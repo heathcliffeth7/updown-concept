@@ -906,6 +906,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .ps-st { font-size: 12.5px; font-weight: 700; display: flex; align-items: center; gap: 6px; color: var(--muted); white-space: nowrap; }
 .ps-st::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
 .pstrip.win .ps-st { color: var(--green); } .pstrip.lose .ps-st { color: #ff5c7a; }
+.ps-ent { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-weight: 650; font-variant-numeric: tabular-nums; } /* entry price after Winning / Losing */
+.ps-ent i { font-style: normal; color: var(--dim); }
+.ps-stt .ps-ent { gap: 5px; }
 .ps-cash { flex: none; height: 46px; min-width: 104px; padding: 0 12px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15;
   color: #0b0b11; background: linear-gradient(180deg, #fff, #e4e6ee); border: 1px solid rgba(255,255,255,.7); box-shadow: inset 0 -2px 4px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.3); transition: transform .1s; }
 .ps-cash > span { font-size: 11px; font-weight: 700; opacity: .62; letter-spacing: .01em; }
@@ -3856,8 +3859,11 @@ function tfxLens(box, animate) {
 // (it opens the sheet for that side only), then the round either way: "If ▲ Up wins −$2.46 · If ▼ Down wins +$2.22" (roundIfs: cash-outs
 // already taken + that side's payout − everything put in). The outcome the price points to right now is the brighter half of that line.
 const psCashHTML = (s, one) => `<button class="ps-cash"${one ? ' id="psCash"' : ""} data-side="${s}"><span>Cash out<i class="ps-sr"> ${s === "up" ? "Up" : "Down"}</i></span><b${one ? ' id="psVal"' : ""} data-side="${s}"></b></button>`;
-const psOneHTML = b => `<div class="ps-l"><div class="ps-r1"><span class="ps-side ${b.side}">${sideTxt(b.side)}</span>${money(b.stake)} <span class="ar">→</span> ${money(b.payout)}</div><div class="ps-st" id="psSt"></div></div>${psCashHTML(b.side, true)}`;
-const psRowHTML = b => `<div class="ps-row" data-side="${b.side}"><span class="ps-side ${b.side}">${sideTxt(b.side)}</span><span class="ps-mid"><span class="ps-amt">${psUsd(b.stake)} <span class="ar">→</span> ${moneyShort(b.payout)}</span><span class="ps-stt"></span></span>${psCashHTML(b.side)}</div>`;
+// the price you got in at, next to Winning / Losing: "Entry 48¢" (one buy), "Avg 47.5¢" (several buys of that side: stake ÷ shares)
+const psEntTxt = b => { const c = Math.round(b.stake / b.payout * 1000) / 10; return `${b.n > 1 ? "Avg" : "Entry"} ${Number.isInteger(c) ? c : c.toFixed(1)}¢`; };
+const psEntHTML = b => `<span class="ps-ent"><i aria-hidden="true">·</i>${psEntTxt(b)}</span>`;
+const psOneHTML = b => `<div class="ps-l"><div class="ps-r1"><span class="ps-side ${b.side}">${sideTxt(b.side)}</span>${money(b.stake)} <span class="ar">→</span> ${money(b.payout)}</div><div class="ps-st"><span id="psSt"></span>${psEntHTML(b)}</div></div>${psCashHTML(b.side, true)}`;
+const psRowHTML = b => `<div class="ps-row" data-side="${b.side}"><span class="ps-side ${b.side}">${sideTxt(b.side)}</span><span class="ps-mid"><span class="ps-amt">${psUsd(b.stake)} <span class="ar">→</span> ${moneyShort(b.payout)}</span><span class="ps-stt"><span class="t"></span>${psEntHTML(b)}</span></span>${psCashHTML(b.side)}</div>`;
 const psIfHTML = f => `<div class="ps-if"><span data-if="up">If <span aria-hidden="true">▲ </span>Up wins <b class="${netCls(f.up)}">${netTxt(f.up)}</b></span><i aria-hidden="true">·</i><span data-if="down">If <span aria-hidden="true">▼ </span>Down wins <b class="${netCls(f.down)}">${netTxt(f.down)}</b></span></div>`;
 function renderMine(m) {
   const ps = roundPositions(m), dock = $("dock"), strip = $("pStrip"), card = $("chartCard");
@@ -3889,7 +3895,7 @@ function renderMine(m) {
       const row = strip.querySelector(`.ps-row[data-side="${s}"]`), winning = (s === "up") === upNow;
       TFX.psV[s].set(B[s].val);
       row.classList.toggle("win", winning); row.classList.toggle("lose", !winning);
-      const st = rem <= 0 ? "Ended" : winning ? "Winning" : "Losing", stEl = row.querySelector(".ps-stt"); if (stEl.textContent !== st) stEl.textContent = st;
+      const st = rem <= 0 ? "Ended" : winning ? "Winning" : "Losing", stEl = row.querySelector(".ps-stt .t"); if (stEl.textContent !== st) stEl.textContent = st;
       row.querySelector(".ps-cash").disabled = rem <= 0 || B[s].val < .005;
     }
     strip.querySelectorAll(".ps-if > span").forEach(el => el.classList.toggle("now", (el.dataset.if === "up") === upNow));
