@@ -909,6 +909,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .ps-ent { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-weight: 650; font-variant-numeric: tabular-nums; } /* entry price after Winning / Losing */
 .ps-ent i { font-style: normal; color: var(--dim); }
 .ps-stt .ps-ent { gap: 5px; }
+/* step 25: no state word (behind): no dot, no separator, just the entry price */
+.ps-st.nost::before, .ps-stt.nost::before, .nost .ps-ent i { display: none; }
 .ps-cash { flex: none; height: 46px; min-width: 104px; padding: 0 12px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15;
   color: #0b0b11; background: linear-gradient(180deg, #fff, #e4e6ee); border: 1px solid rgba(255,255,255,.7); box-shadow: inset 0 -2px 4px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.3); transition: transform .1s; }
 .ps-cash > span { font-size: 11px; font-weight: 700; opacity: .62; letter-spacing: .01em; }
@@ -3885,26 +3887,30 @@ function renderMine(m) {
   if (!dual) {
     const winning = (one === "up") === upNow;
     TFX.psV[one].set(B[one].val);
-    const st = rem <= 0 ? "Round ended" : `${rem <= 10 ? "Final seconds · " : ""}${winning ? "Winning now" : "Losing now"}`;
+    // step 25: only winning gets a colour and a word. Behind, the strip stays neutral and just shows the entry price: no red "Losing now"
+    // nudging people to panic-sell (the Cash out value still says what it's worth)
+    const st = rem <= 0 ? "Round ended" : winning ? `${rem <= 10 ? "Final seconds · " : ""}Winning now` : rem <= 10 ? "Final seconds" : "";
     const stEl = $("psSt"); if (stEl.textContent !== st) stEl.textContent = st;
-    strip.classList.toggle("win", winning); strip.classList.toggle("lose", !winning);
+    stEl.parentNode.classList.toggle("nost", !st);
+    strip.classList.toggle("win", winning); strip.classList.remove("lose");
     $("psCash").disabled = rem <= 0 || B[one].val < .005;
-    mood = winning ? "win" : "lose";
+    mood = winning ? "win" : "";
   } else {
     for (const s of ["up", "down"]) {
       const row = strip.querySelector(`.ps-row[data-side="${s}"]`), winning = (s === "up") === upNow;
       TFX.psV[s].set(B[s].val);
-      row.classList.toggle("win", winning); row.classList.toggle("lose", !winning);
-      const st = rem <= 0 ? "Ended" : winning ? "Winning" : "Losing", stEl = row.querySelector(".ps-stt .t"); if (stEl.textContent !== st) stEl.textContent = st;
+      row.classList.toggle("win", winning); row.classList.remove("lose"); // step 25: the side that's behind stays neutral, no "Losing"
+      const st = rem <= 0 ? "Ended" : winning ? "Winning" : "", stEl = row.querySelector(".ps-stt .t"); if (stEl.textContent !== st) stEl.textContent = st;
+      stEl.parentNode.classList.toggle("nost", !st);
       row.querySelector(".ps-cash").disabled = rem <= 0 || B[s].val < .005;
     }
     strip.querySelectorAll(".ps-if > span").forEach(el => el.classList.toggle("now", (el.dataset.if === "up") === upNow));
     const f = roundIfs(m), now = upNow ? f.up : f.down;
-    mood = now >= .005 ? "win" : now <= -.005 ? "lose" : "";
+    mood = now >= .005 ? "win" : ""; // step 25: no red glow when the round is down
   }
   card.classList.toggle("win", mood === "win"); card.classList.toggle("lose", mood === "lose");
   const flip = dual ? (upNow ? "u" : "d") : mood; // both sides: the outcome flipped (one row starts winning, the other losing)
-  if (TFX.stripWin !== null && TFX.stripWin !== flip) { restartCls(strip, "flash"); fx.flip(mood === "win"); }
+  if (TFX.stripWin !== null && TFX.stripWin !== flip && mood === "win") { restartCls(strip, "flash"); fx.flip(true); } // step 25: going behind is quiet, only a win flashes
   TFX.stripWin = flip;
 }
 
