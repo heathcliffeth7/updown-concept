@@ -248,6 +248,46 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .ph .xl { color: var(--muted); flex: none; display: inline-flex; }
 .ph .ago { color: var(--dim); font-size: 14px; white-space: nowrap; }
 .ph .more { margin-left: auto; color: var(--dim); padding: 0 2px; font-size: 18px; line-height: 1; letter-spacing: 1px; }
+/* FOLLOW:BEGIN css (follow/apply_follow.py; edit follow/follow.{css,js} and re-run) */
+/* Step 30: Follow in each feed card's header, right of the name / time, before "···". Neutral liquid glass, no colour:
+   Follow = a light glass pill with a plus; Following = dimmer, a check. Long names ellipsize before it (.ph b already does). */
+.ph .fol-b { margin-left: auto; flex: none; position: relative; display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 10px 0 8px;
+  border-radius: 999px; border: 1px solid rgba(255, 255, 255, .17); color: #f2f3f7; font: inherit; font-size: 12.5px; font-weight: 700; line-height: 1;
+  letter-spacing: .1px; white-space: nowrap; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .15), rgba(255, 255, 255, .055)) rgba(255, 255, 255, .03);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .24), inset 0 -1px 0 rgba(0, 0, 0, .18), 0 1px 3px rgba(0, 0, 0, .3);
+  transition: color .2s, background-color .2s, border-color .2s, box-shadow .2s, transform .16s; }
+.ph .fol-b + .more { margin-left: 3px; }
+.ph .fol-b::after { content: ""; position: absolute; inset: -6px -4px; border-radius: inherit; }   /* 36 px tall tap target */
+.ph .fol-b .fol-i { width: 11px; height: 11px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.ph .fol-b .fol-chk { display: none; stroke-dasharray: 12; stroke-dashoffset: 0; }
+.ph .fol-b.on { color: var(--muted, #a5adbe); border-color: rgba(255, 255, 255, .09); background: rgba(255, 255, 255, .035);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06); }
+.ph .fol-b.on .fol-plus { display: none; }
+.ph .fol-b.on .fol-chk { display: inline; }
+@media (hover: hover) { .ph .fol-b:hover { border-color: rgba(255, 255, 255, .26); } .ph .fol-b.on:hover { color: #c9cfdb; border-color: rgba(255, 255, 255, .15); } }
+.ph .fol-b:active { transform: scale(.93); }
+.ph .fol-b:focus-visible { outline: 2px solid rgba(255, 255, 255, .7); outline-offset: 2px; }
+/* follow: a pop with a little overshoot, the check draws in, a soft glass ring rings out; unfollow: a small settle */
+.ph .fol-b::before { content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; opacity: 0;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .5), 0 0 12px rgba(255, 255, 255, .25); }
+.ph .fol-b.fol-pop, .cd-follow.fol-pop { animation: fol-pop .42s cubic-bezier(.3, 1.6, .5, 1); }
+.ph .fol-b.fol-pop::before { animation: fol-ring .5s ease-out; }
+.ph .fol-b.fol-pop .fol-chk { animation: fol-draw .3s .06s ease-out both; }
+.ph .fol-b.fol-unpop, .cd-follow.fol-unpop { animation: fol-unpop .24s ease-out; }
+@keyframes fol-pop { 0% { transform: scale(.86); } 45% { transform: scale(1.08); } 100% { transform: scale(1); } }
+@keyframes fol-unpop { 0% { transform: scale(.93); } 100% { transform: scale(1); } }
+@keyframes fol-ring { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.25, 1.6); } }
+@keyframes fol-draw { from { stroke-dashoffset: 12; } to { stroke-dashoffset: 0; } }
+/* unfollowed on the Following tab: the card stays until the tab changes */
+.feed.fol .post.fol-keep { display: flex; }
+/* narrow phones: a slightly tighter pill, and the (inert) "···" gives its room to the name */
+@media (max-width: 389px) { .ph .fol-b { padding: 0 8px 0 7px; gap: 3px; font-size: 12px; } .ph .fol-b + .more { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .ph .fol-b, .ph .fol-b::before, .ph .fol-b .fol-chk, .cd-follow.fol-pop, .cd-follow.fol-unpop { animation: none !important; transition: none; }
+  .ph .fol-b:active { transform: none; }
+}
+/* FOLLOW:END css */
 .ptxt { font-size: 15px; margin-top: 2px; line-height: 1.35; }
 .pos { margin-top: 9px; display: flex; align-items: center; gap: 11px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; cursor: pointer; }
 .pos * { pointer-events: none; }
@@ -3636,13 +3676,82 @@ const AI = {
   eye: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.8"/></svg>`,
 };
 const avStyle = u => `background:linear-gradient(135deg,hsl(${u.hue} 70% 55%),hsl(${(u.hue + 50) % 360} 70% 40%))`;
+// FOLLOW:BEGIN js (follow/apply_follow.py; edit follow/follow.{css,js} and re-run)
+// Step 30: Follow buttons in the Social feed. One follow state for the whole app: the host's own USERS[i].follow flag, which the
+// Following tab (.post.isfol), the call sheet's Follow (#cdFollow via cdSyncFollow) and its "K you follow" line already read.
+// followSet() is the only writer: feed buttons, the call sheet's Follow (cdToggleFollow delegates here) and window.Follow.
+// Your "N following" count (ME.following, shown in the Social header and Portfolio) moves with it.
+// Remembered in localStorage "updown.follow" (only the names that differ from the seeded state; try/catch: blocked storage still works
+// in memory). Reset demo restores the seeded follows.
+const FOL = { KEY: "updown.follow", seed: new Map(USERS.map(u => [u.name, !!u.follow])), base: ME.following, n0: USERS.filter(u => u.follow).length };
+const FOL_IC = `<svg class="fol-i" viewBox="0 0 12 12" aria-hidden="true"><path class="fol-plus" d="M6 2.2v7.6M2.2 6h7.6"/><path class="fol-chk" d="M2.3 6.4l2.4 2.4 5-5.3"/></svg>`;
+function folIsMe(u) { return !u || u === ME || !!u.me || u.name === ME.name; }
+function folCount() { ME.following = FOL.base + USERS.filter(u => u.follow).length - FOL.n0; }
+function folSave() {
+  const d = {}; USERS.forEach(u => { if (!!u.follow !== FOL.seed.get(u.name)) d[u.name] = u.follow ? 1 : 0; });
+  try { if (Object.keys(d).length) localStorage.setItem(FOL.KEY, JSON.stringify(d)); else localStorage.removeItem(FOL.KEY); } catch (e) {}
+}
+(function folLoad() {
+  let d = null; try { d = JSON.parse(localStorage.getItem(FOL.KEY) || "null"); } catch (e) { d = null; }
+  if (d && typeof d === "object") USERS.forEach(u => { if (Object.prototype.hasOwnProperty.call(d, u.name)) u.follow = !!d[u.name]; });
+  folCount();
+})();
+function folReset() { USERS.forEach(u => { u.follow = FOL.seed.get(u.name); }); folCount(); try { localStorage.removeItem(FOL.KEY); } catch (e) {} }
+// the feed card's button (postEl's header, before "···"); none on your own calls
+function followBtnHTML(u) {
+  if (folIsMe(u)) return "";
+  const on = !!u.follow;
+  return `<button class="fol-b${on ? " on" : ""}" type="button" data-act="follow" aria-pressed="${on}" aria-label="Follow ${u.name}">${FOL_IC}<span class="fol-t">${on ? "Following" : "Follow"}</span></button>`;
+}
+function folPaint(el, on) {
+  el.querySelectorAll(".fol-b").forEach(b => {
+    b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on));
+    const t = b.querySelector(".fol-t"); if (t) t.textContent = on ? "Following" : "Follow";
+  });
+}
+function followSet(u, on) {
+  on = !!on; if (folIsMe(u) || !!u.follow === on) return false;
+  u.follow = on; folCount(); folSave();
+  const keep = socialTab === "following" && !on; // unfollowing on the Following tab: the card stays until you switch tabs (it never vanishes under your finger)
+  posts.forEach(q => {
+    if (q.user !== u || !q.el) return;
+    q.el.classList.toggle("isfol", on); if (keep) q.el.classList.add("fol-keep"); else if (on) q.el.classList.remove("fol-keep");
+    folPaint(q.el, on);
+  });
+  syncFolEmpty();
+  if (CD.p && CD.p.user === u) { cdSyncFollow(); if (CD.open) renderCall(); }
+  return true;
+}
+function folPop(btn, on) { // a quick pop (+ the check draws in) on follow, a small settle on unfollow
+  if (!btn || (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+  btn.classList.remove("fol-pop", "fol-unpop"); void btn.offsetWidth; btn.classList.add(on ? "fol-pop" : "fol-unpop");
+  clearTimeout(btn.__folT); btn.__folT = setTimeout(() => btn.classList.remove("fol-pop", "fol-unpop"), 600);
+}
+function folTap(u, btn) { const on = !u.follow; if (followSet(u, on)) { folPop(btn, on); if (window.fx) fx.tap(); } }
+// feed taps: capture on document, so the post's own click (open the call sheet) and Copy never see a tap on Follow
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest(".fol-b"); if (!b) return;
+  e.stopPropagation(); e.preventDefault();
+  const node = b.closest(".post"); if (!node || node.parentNode !== $("feed")) return; // e.g. GlassSeg's cross-fade ghost
+  const p = posts.find(x => x.id === +node.dataset.id); if (p) folTap(p.user, b);
+}, true);
+// Reset demo: back to the seeded follows before the host's reset() re-seeds the feed (capture runs before the button's own listener)
+document.addEventListener("click", e => { if (e.target.closest && e.target.closest("#reset")) folReset(); }, true);
+// a tab switch (the feed's "fol" class changes) lets kept cards go
+new MutationObserver(() => $("feed").querySelectorAll(".post.fol-keep").forEach(n => n.classList.remove("fol-keep"))).observe($("feed"), { attributes: true, attributeFilter: ["class"] });
+window.Follow = {
+  isOn: name => { const u = USERS.find(x => x.name === name); return !!(u && u.follow); },
+  set: (name, on) => { const u = USERS.find(x => x.name === name); return u ? followSet(u, on) : false; },
+  list: () => USERS.filter(u => u.follow).map(u => u.name),
+};
+// FOLLOW:END js
 function postEl(p, isNew) {
   const a = ASSETS[p.asset], u = p.user, up = p.side === "up";
   const el = document.createElement("div");
   el.className = "post" + (u.follow ? " isfol" : "") + (isNew ? " new" : ""); el.dataset.id = p.id;
   el.innerHTML = `<span class="av" style="${avStyle(u)}">${u.initials}</span>
     <div class="pb">
-      <div class="ph"><b>${u.name}</b>${u.x ? `<span class="xl">${xLogo}</span>` : ""}<span class="ago">· <span data-f="ago"></span></span><span class="more">···</span></div>
+      <div class="ph"><b>${u.name}</b>${u.x ? `<span class="xl">${xLogo}</span>` : ""}<span class="ago">· <span data-f="ago"></span></span>${/*FOLLOW*/followBtnHTML(u)}<span class="more">···</span></div>
       <div class="ptxt">${p.text}</div>${/*GIFS:EL*/postGifHTML(p)}
       <div class="pos" data-act="open">
         <span class="ci"><span class="coin" data-al="${p.asset}" style="background:${a.color}">${a.glyph}</span><i>${p.round}</i></span>
@@ -5768,11 +5877,7 @@ function cdGoMarket() {
 $("cdMkt").addEventListener("click", cdGoMarket);
 $("cdGo").addEventListener("click", cdGoMarket);
 $("cdCopy").addEventListener("click", () => { const p = CD.p; if (simNow >= p.end) { cdGoMarket(); return; } openTradeSheet({ asset: p.asset, round: p.round, side: p.side, from: p.user.name }); });
-function cdToggleFollow() {
-  const u = CD.p.user; u.follow = !u.follow;
-  posts.forEach(q => { if (q.user === u && q.el) q.el.classList.toggle("isfol", u.follow); });
-  syncFolEmpty(); cdSyncFollow(); renderCall();
-}
+function cdToggleFollow() { /*FOLLOW*/folTap(CD.p.user, $("cdFollow")); } // step 30: one shared follow state (follow/follow.js)
 $("cdFollow").addEventListener("click", cdToggleFollow);
 // swipe down on the grabber to close (pointer drag; the scrim follows)
 (function cdDrag() {
