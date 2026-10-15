@@ -3872,7 +3872,7 @@ function renderMine(m) {
   const holding = ps.length > 0;
   dock.classList.toggle("holding", holding);
   if (!holding) { TFX.stripKey = null; TFX.stripWin = null; card.classList.remove("win", "lose"); return; }
-  const B = sideBook(ps, m), dual = B.both, one = B.up.n ? "up" : "down", rem = m.end - simNow, upNow = m.now > m.target;
+  const B = sideBook(ps, m), dual = B.both, one = B.up.n ? "up" : "down", rem = m.end - simNow;
   const key = (dual ? "2" : "1") + ps.map(p => p.t + p.side + p.stake.toFixed(4)).join("|");
   if (TFX.stripKey !== key) {
     const fresh = TFX.stripKey === null;
@@ -3883,35 +3883,27 @@ function renderMine(m) {
     strip.querySelectorAll(".ps-cash b").forEach(b => { const s = b.dataset.side; TFX.psV[s] = MA.label(b, { format: v => money(v), minInterval: 1000, timing: "snappy" }); TFX.psV[s].snap(B[s].val); });
     TFX.stripKey = key; if (fresh) restartCls(strip, "pop");
   }
-  let mood; // the chart card's glow: would this round be a gain if it ended now?
   if (!dual) {
-    const winning = (one === "up") === upNow;
     TFX.psV[one].set(B[one].val);
-    // step 25: only winning gets a colour and a word. Behind, the strip stays neutral and just shows the entry price: no red "Losing now"
-    // nudging people to panic-sell (the Cash out value still says what it's worth)
-    const st = rem <= 0 ? "Round ended" : winning ? `${rem <= 10 ? "Final seconds · " : ""}Winning now` : rem <= 10 ? "Final seconds" : "";
+    // step 25/26: no Winning / Losing word and no green / red tint: the strip stays neutral and shows the entry price (a red "Losing now"
+    // nudges people to panic-sell; the Cash out value still says what it's worth). Only the clock speaks: "Final seconds", "Round ended"
+    const st = rem <= 0 ? "Round ended" : rem <= 10 ? "Final seconds" : "";
     const stEl = $("psSt"); if (stEl.textContent !== st) stEl.textContent = st;
     stEl.parentNode.classList.toggle("nost", !st);
-    strip.classList.toggle("win", winning); strip.classList.remove("lose");
+    strip.classList.remove("win", "lose");
     $("psCash").disabled = rem <= 0 || B[one].val < .005;
-    mood = winning ? "win" : "";
   } else {
     for (const s of ["up", "down"]) {
-      const row = strip.querySelector(`.ps-row[data-side="${s}"]`), winning = (s === "up") === upNow;
+      const row = strip.querySelector(`.ps-row[data-side="${s}"]`);
       TFX.psV[s].set(B[s].val);
-      row.classList.toggle("win", winning); row.classList.remove("lose"); // step 25: the side that's behind stays neutral, no "Losing"
-      const st = rem <= 0 ? "Ended" : winning ? "Winning" : "", stEl = row.querySelector(".ps-stt .t"); if (stEl.textContent !== st) stEl.textContent = st;
+      row.classList.remove("win", "lose"); // step 25/26: both rows neutral, no Winning / Losing
+      const st = rem <= 0 ? "Ended" : "", stEl = row.querySelector(".ps-stt .t"); if (stEl.textContent !== st) stEl.textContent = st;
       stEl.parentNode.classList.toggle("nost", !st);
       row.querySelector(".ps-cash").disabled = rem <= 0 || B[s].val < .005;
     }
-    strip.querySelectorAll(".ps-if > span").forEach(el => el.classList.toggle("now", (el.dataset.if === "up") === upNow));
-    const f = roundIfs(m), now = upNow ? f.up : f.down;
-    mood = now >= .005 ? "win" : ""; // step 25: no red glow when the round is down
   }
-  card.classList.toggle("win", mood === "win"); card.classList.toggle("lose", mood === "lose");
-  const flip = dual ? (upNow ? "u" : "d") : mood; // both sides: the outcome flipped (one row starts winning, the other losing)
-  if (TFX.stripWin !== null && TFX.stripWin !== flip && mood === "win") { restartCls(strip, "flash"); fx.flip(true); } // step 25: going behind is quiet, only a win flashes
-  TFX.stripWin = flip;
+  card.classList.remove("win", "lose"); // step 26: no chart-card glow either way, and no brighter "If … wins" half: nothing says who's ahead
+  // step 26: no flash / tone when the lead flips (the strip no longer shows who's ahead)
 }
 
 // ---- time: hero countdown colours + last-10-seconds heartbeat ----
