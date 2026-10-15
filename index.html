@@ -1307,6 +1307,106 @@ html.sg-lens #tradeSheet > .sg-edge { backdrop-filter: url(#sgLens) blur(1.6px) 
   #buyBtn.busy .bb-fill { transform: scaleX(1); opacity: .5; }
   #buyBtn.ok .bb-chk path { stroke-dashoffset: 0; }
 }
+/* ---------- step 26: Market | Limit in the trade sheet (ord*() in tradefx.js) ----------
+   Order type: a compact glass segmented control above the amounts. GlassSeg's lens stays clear glass here (an order type is a mode, not money: the
+   side colours stay on the amounts and the slab). Limit carries a small count of your open orders on this market.
+   Limit: the Price well becomes your limit price: − / + glass buttons (hold to repeat) around a rolling number, the live price beside the label.
+   At or above the price the number turns green: it buys now. Under Balance after: the cash the order holds. Your open orders here are rows above
+   the slab (live distance to the price, Cancel); a filled / canceled / unfilled one says so for a moment, then folds away.
+   Market page: an open order is a small glass chip in the chart's top band, left of the Closes in chip (tap: the sheet in Limit). It sits under the
+   live calls' layer (z 3): a passing call bubble or pin draws over it, as transient things over a persistent label. */
+#tradeSheet .sg-ot { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 11px; padding: 3px; border-radius: 999px; isolation: isolate;
+  background: rgba(0,0,0,.26); border: 1px solid rgba(255,255,255,.04); box-shadow: inset 0 1.5px 4px rgba(0,0,0,.45), inset 0 -1px 0 rgba(255,255,255,.06); }
+#tradeSheet .sg-ot[hidden] { display: none; }
+#tradeSheet .sg-ot button { position: relative; z-index: 1; height: 30px; padding: 0; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 14.5px; font-weight: 700; color: rgba(242,243,247,.55); transition: color .25s, transform .12s; }
+#tradeSheet .sg-ot button.on { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
+#tradeSheet .sg-ot + .amts { margin-top: 8px; }
+.so-n { min-width: 17px; height: 17px; padding: 0 5px; border-radius: 999px; font-size: 11px; font-weight: 800; font-style: normal; line-height: 17px; text-align: center;
+  color: #0b0b11; background: rgba(242,243,247,.88); text-shadow: none; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+.so-n:empty { display: none; }
+#tradeSheet .sh-rows > div[hidden] { display: none; }
+#sLimTile { padding: 8px 7px 7px 13px; gap: 4px; }
+#sLimTile > span:first-child { justify-content: space-between; padding-right: 6px; }
+#sLimTile .sl-now { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+#sLimTile .sl-now > span { font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+#sLimTile > .sl-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; font-size: inherit; color: var(--text); }
+#sLimTile .sl-v { flex: 1; justify-content: center; font-size: 21px; font-weight: 750; letter-spacing: -.01em; font-variant-numeric: tabular-nums; transition: color .2s; }
+#sLimTile .sl-v.now { color: #2ee88a; }
+#sLimTile .sl-v.bump { animation: ordBump .24s cubic-bezier(.2,.9,.3,1); }
+#sLimTile .sl-v.flip { animation: ordFlip .5s ease-out; }
+@keyframes ordBump { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: none; } }
+@keyframes ordFlip { 0% { transform: scale(1); text-shadow: 0 0 0 rgba(46,232,138,0); } 30% { transform: scale(1.16); text-shadow: 0 0 14px rgba(46,232,138,.7); } 100% { transform: none; } }
+.sl-btn { position: relative; flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: #fff; touch-action: manipulation;
+  background: linear-gradient(180deg, rgba(255,255,255,.17), rgba(255,255,255,.05)); border: 1px solid rgba(255,255,255,.1); border-top-color: rgba(255,255,255,.32);
+  border-bottom-color: rgba(255,255,255,.05); box-shadow: inset 0 1px 0 rgba(255,255,255,.22), inset 0 -4px 8px rgba(0,0,0,.18), 0 2px 7px rgba(0,0,0,.32); transition: transform .1s, opacity .2s; }
+.sl-btn::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; } /* a 44 px target around the 34 px glass */
+.sl-btn:active:not(:disabled) { transform: scale(.88); }
+.sl-btn:disabled { opacity: .28; }
+.sl-btn:focus-visible { outline: 2px solid rgba(255,255,255,.7); outline-offset: 2px; }
+.sl-hold { display: block; margin-top: 1px; font-size: 11px; font-weight: 600; line-height: 1.25; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sl-hold[hidden] { display: none; }
+.so-list { margin-top: 9px; display: flex; flex-direction: column; gap: 5px; max-height: 81px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.so-list::-webkit-scrollbar { display: none; }
+.so-list[hidden] { display: none; }
+.so-row { flex: none; display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 4px 0 5px; border-radius: 14px; overflow: hidden;
+  background: linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.15)); border: 1px solid rgba(255,255,255,.045);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.35), inset 0 -1px 0 rgba(255,255,255,.06); font-size: 13.5px; font-weight: 650; font-variant-numeric: tabular-nums;
+  transition: background .3s, border-color .3s; }
+.so-row .ps-side { flex: none; min-width: 58px; text-align: center; }
+.so-mid { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+.so-mid b { color: var(--text); font-weight: 750; }
+.so-away { flex: none; font-size: 12px; font-weight: 650; color: var(--dim); white-space: nowrap; transition: color .3s; }
+.so-row.near .so-away { color: #2ee88a; }
+.so-x { flex: none; height: 30px; padding: 0 12px; border-radius: 11px; font-size: 12.5px; font-weight: 700; color: var(--text);
+  background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05)); border: 1px solid rgba(255,255,255,.1); border-top-color: rgba(255,255,255,.26);
+  box-shadow: 0 2px 6px rgba(0,0,0,.25); transition: transform .1s; }
+.so-x:active { transform: scale(.94); }
+.so-row.out .so-away, .so-row.out .so-x { display: none; }
+.so-row.filled { border-color: rgba(0,191,99,.36); background: linear-gradient(90deg, rgba(0,191,99,.2), rgba(0,191,99,.04) 72%); }
+.so-row.filled .so-mid, .so-row.filled .so-mid b { color: #2ee88a; }
+.sh-note.sg-onote b { color: var(--text); }
+/* the market page's chip: an open order on this market (the one nearest to filling; with more than one, their count replaces the live dot), live distance to its price */
+#vMarket .ord-chip { position: absolute; top: 8px; left: 8px; z-index: 2; height: 32px; max-width: calc(100% - 16px); display: inline-flex; align-items: center; gap: 6px;
+  padding: 0 11px 0 10px; border-radius: 999px; white-space: nowrap; color: var(--text); font-variant-numeric: tabular-nums;
+  background: var(--lg-film), rgba(20,20,31,.55); -webkit-backdrop-filter: var(--lg-blur); backdrop-filter: var(--lg-blur);
+  border: 1px solid var(--lg-edge); border-top-color: var(--lg-top); box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 4px 12px rgba(0,0,0,.35);
+  transition: opacity .2s, border-color .3s, background-color .3s, transform .12s; }
+#vMarket .ord-chip[hidden] { display: none; }
+#vMarket .ord-chip:active { transform: scale(.95); }
+#vMarket .ord-chip.wait { opacity: 0; transition: none; }
+#vMarket .chart.settle .ord-chip { opacity: .45; }
+.ord-chip .oc-dot { position: relative; width: 7px; height: 7px; flex: none; border-radius: 50%; background: currentColor; color: var(--muted); }
+.ord-chip.up .oc-dot { color: var(--green); } .ord-chip.down .oc-dot { color: #ff5c7a; }
+.ord-chip .oc-dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: currentColor; animation: sgLive 1.8s ease-out infinite; }
+.ord-chip .oc-k { font-size: 12px; font-weight: 600; color: var(--muted); }
+.ord-chip .oc-p { display: inline-flex; align-items: baseline; gap: 3px; font-size: 14.5px; font-weight: 750; }
+.ord-chip .oc-p i { font-style: normal; font-size: .78em; }
+.ord-chip.up .oc-p i { color: #2ee88a; } .ord-chip.down .oc-p i { color: #ff5c7a; }
+.ord-chip .oc-d { font-size: 12px; font-weight: 600; color: var(--muted); transition: color .3s; }
+.ord-chip.near .oc-d { color: #2ee88a; }
+.ord-chip .oc-cnt { min-width: 16px; height: 16px; flex: none; padding: 0 4px; border-radius: 999px; display: grid; place-items: center; font-size: 10.5px; font-weight: 800; font-style: normal; line-height: 1; }
+.ord-chip.up .oc-cnt { color: #04170c; background: #2ee88a; } .ord-chip.down .oc-cnt { color: #fff; background: #f0466c; }
+.ord-chip.nol .oc-k, .ord-chip.nod .oc-d { display: none; } /* a narrow band: no label / no distance (ordChipFit) */
+.ord-chip .oc-t { font-size: 13px; font-weight: 700; }
+.ord-chip .oc-ok { width: 16px; height: 16px; flex: none; border-radius: 50%; display: grid; place-items: center; color: #04170c; background: #2ee88a; }
+#vMarket .ord-chip.fill { color: #eafff3; background: var(--lg-film), rgba(0,191,99,.3); border-color: rgba(46,232,138,.5); border-top-color: rgba(200,255,225,.7);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 0 20px rgba(0,191,99,.45), 0 4px 12px rgba(0,0,0,.35); }
+#vMarket .ord-chip.back .oc-dot { color: rgba(242,243,247,.8); }
+#vMarket .ord-chip.back .oc-dot::after { animation: none; opacity: 0; }
+#vMarket .ord-chip.land { animation: ordLand .5s cubic-bezier(.2,1.5,.4,1); }
+@keyframes ordLand { 0% { transform: scale(.9); } 45% { transform: scale(1.08); } 100% { transform: none; } }
+#vMarket .ord-chip .sg-shine { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; z-index: 2; }
+#vMarket .ord-chip .sg-shine i { position: absolute; top: -20%; bottom: -20%; left: 0; width: 46%; transform: translateX(-130%) skewX(-18deg);
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.1) 30%, rgba(255,255,255,.34) 50%, rgba(255,255,255,.1) 70%, rgba(255,255,255,0));
+  animation: sgSweep .75s cubic-bezier(.3,.6,.3,1) forwards; }
+/* Portfolio > Activity: a placed order ("Limit"), a cancel ("Canceled") and an order that didn't fill ("Not filled") are neutral rows (a fill is a normal Buy) */
+.screen-portfolio .pf-badge.order { color: #dfe3ee; background: rgba(255,255,255,.1); }
+.screen-portfolio .pf-badge.cancel, .screen-portfolio .pf-badge.expired { color: #a3a8b8; background: rgba(255,255,255,.06); }
+@media (prefers-reduced-motion: reduce) {
+  #sLimTile .sl-v.bump, #sLimTile .sl-v.flip, .ord-chip .oc-dot::after, #vMarket .ord-chip.land, #vMarket .ord-chip .sg-shine i { animation: none !important; }
+  #tradeSheet .sg-ot button, #sLimTile .sl-v, .sl-btn, .so-row, .so-away, #vMarket .ord-chip, .ord-chip .oc-d { transition: none !important; }
+}
 
 /* phone (full-screen) */
 @media (max-width: 760px) {
@@ -1949,12 +2049,15 @@ html.sg-lens #tradeSheet > .sg-edge { backdrop-filter: url(#sgLens) blur(1.6px) 
             <span class="sh-mult" id="sMultBox"><span class="sg-mx" id="sMult"></span><small>payout</small></span>
           </div>
           <div class="sh-sub"><span id="sProfit"></span><span id="sPw">profit</span><span class="sg-sep">·</span><span class="sg-lose" id="sLose"></span><span id="sPct"></span></div>
+          <div class="sg-ot" id="sOrd" role="group" aria-label="Order type"><button data-o="market" class="on" aria-pressed="true">Market</button><button data-o="limit" aria-pressed="false">Limit<i class="so-n" id="sOrdN" aria-hidden="true"></i></button></div>
           <div class="amts" id="amts"></div>
           <div class="sh-rows">
             <div id="sPriceTile"><span><i class="sg-live" aria-hidden="true"></i><span id="sPriceLbl">Price</span></span><b><span id="sCents"></span><em class="sg-tick" id="sTick" aria-hidden="true"></em></b></div>
-            <div><span>Balance after</span><b><span id="sBal"></span></b></div>
+            <div class="sg-lim" id="sLimTile" hidden><span><span>Limit price</span><span class="sl-now"><i class="sg-live" aria-hidden="true"></i>now <span id="sNowC"></span></span></span><span class="sl-row"><button class="sl-btn" id="sLimDn" aria-label="Lower your limit price by 1¢"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7h9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button><b class="sl-v" id="sLimBox" aria-live="polite"><span id="sLimV"></span></b><button class="sl-btn" id="sLimUp" aria-label="Raise your limit price by 1¢"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7h9M7 2.5v9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></span></div>
+            <div><span>Balance after</span><b><span id="sBal"></span></b><small class="sl-hold" id="sHold" hidden></small></div>
           </div>
           <div class="sh-note" id="sNote"></div>
+          <div class="so-list" id="sOrders" hidden></div>
           <div class="bb-wrap"><i class="bb-wave" id="bbWave" aria-hidden="true"></i>
             <button class="buybtn up" id="buyBtn"><span class="bb-fx" aria-hidden="true"><i class="bb-fill"></i><i class="bb-glint"></i></span><span class="spin"></span><span class="bl" id="buyLbl"><span id="buyVerb">Buy ▲ Up</span><span class="bb-sep" id="buySep"> · </span><span id="buyAmt"></span></span><span class="bb-ok" aria-hidden="true"><i class="bb-chk"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.3 4.3L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></i><span id="buyOkTxt"></span></span></button>
           </div>
@@ -3129,7 +3232,7 @@ function reset() {
   hist = {}; live = {}; fine = {};
   for (const k in ASSETS) seedAsset(k, simNow);
   state = { asset: "BTC", round: "15m", amount: 10, side: null, copyFrom: null };
-  balance = 74.82; positions = []; animKey = ""; tfxReset();
+  balance = 74.82; positions = []; animKey = ""; tfxReset(); ordReset();
   starred = new Set(["BTC"]); tier = { idx: 1, pts: 379 };
   seedFeed();
   render(); flashLoading();
@@ -3154,6 +3257,7 @@ function advance(dt) {
   settle();
 }
 function settle() {
+  ordMatch(); // step 26: open limit orders fill when their side's price reaches the limit; unfilled ones are canceled at the round's end (cash back)
   const done = [];
   for (const pos of positions) {
     if (pos.settled || simNow < pos.end) continue;
@@ -3211,7 +3315,7 @@ function posValue(p) {
   const m = market(p.asset, p.round);
   return p.payout * (p.side === "up" ? m.pUp : 1 - m.pUp);
 }
-const portfolioValue = () => balance + positions.reduce((a, p) => a + posValue(p), 0);
+const portfolioValue = () => balance + ordHeld() + positions.reduce((a, p) => a + posValue(p), 0); // + cash held by open limit orders (step 26): still yours
 const PNL_BASE = 74.82 / 1.357; // seeded so today's P&L starts at +35.7%
 
 // ---------------- live chart (Liveline) ----------------
@@ -3656,6 +3760,7 @@ const SA = {
 let sheetSnap = false;
 function renderSheet(m) {
   const sell = state.mode === "sell", snap = sheetSnap, f = snap ? "snap" : "set"; sheetSnap = false;
+  if (snap) ordOpen(); // step 26: every open starts in Market (Limit when it comes from the chart's order chip)
   if (!SA.cd) SA.cd = MA.countdown($("sCd"), { now: () => simNow, end: m.end, hotAt: 30 }); else SA.cd.setEnd(m.end);
   sgClock(m, snap); // the glass "Closes in" chip: ring, amber / red, heartbeat in the last 10 s; flags a round that rolled over while open
   const urg = urgency(m), a = ASSETS[state.asset], coin = $("sCoin");
@@ -3665,19 +3770,23 @@ function renderSheet(m) {
   if (b.classList.contains("ok")) return; // done: hold the numbers the trade was made at (re-rendering now would price a second trade)
   const sellSide = sell ? state.sellSide || cashSide(roundPositions(m)) : null; // step 21: a cash out sells one side; holding both, never the other one
   // when the numbers commit: on open, at once on a user change (amount or share chip), otherwise at most every ~0.5 s with the price
-  const pick = (sell ? "s" : "b") + (sell ? state.sellFrac : state.amount), user = !snap && SG.pick !== pick; SG.pick = pick;
+  const lim = !sell && ORD.type === "limit"; // step 26: a limit order (the switch, the stepper and the order type count as user changes)
+  const pick = (sell ? "s" : "b") + (sell ? state.sellFrac : state.amount) + (lim ? "L" + ORD.limit : ""), user = !snap && SG.pick !== pick; SG.pick = pick;
   const tick = snap || user || performance.now() - SG.numT >= 480; if (tick) SG.numT = performance.now();
   const N = (k, id, v, fmt) => { if (tick) sgNum(SA[k], id, v, fmt, f); };
+  ordSheet(m, sell, tick, f); // step 26: the switch, the limit well, the held cash and your open orders here
   if (!sell) {
-    const up = state.side === "up", c = up ? m.up : m.down, pay = state.amount * 100 / c, short = state.amount > balance, closed = m.end - simNow <= 0;
+    // step 26: in Limit, a price under the ask waits for it (you'd pay your limit: "To win" and the multiplier follow it); at or above the ask it buys now, at the ask
+    const up = state.side === "up", ask = up ? m.up : m.down, rest = lim && ORD.limit < ask;
+    const c = rest ? ORD.limit : ask, pay = state.amount * 100 / c, short = state.amount > balance, closed = m.end - simNow <= 0;
     sgTone(up ? "up" : "down");
     $("sSide").className = "sh-side " + (up ? "up" : "down"); $("sSide").textContent = up ? "▲ Up" : "▼ Down";
     $("sQ").innerHTML = `${sgNewTag()}${state.copyFrom ? `Copying <b>${state.copyFrom}</b> · ` : ""}${up ? "Up" : "Down"} wins if ${state.asset} ends ${up ? "above" : "at or below"} <b>${fmtPrice(state.asset, m.target)}</b> at ${fmtET.format(m.end * 1000)} ET`;
-    $("sWinLbl").textContent = "To win"; $("sWin").classList.remove("neg"); $("sWinWrap").classList.remove("sg-neg"); // classList only: MarketAnim owns .ma-label on these hosts
+    $("sWinLbl").textContent = rest ? "To win if it fills" : "To win"; $("sWin").classList.remove("neg"); $("sWinWrap").classList.remove("sg-neg"); // classList only: MarketAnim owns .ma-label on these hosts
     if (tick) $("sWinWrap").classList.toggle("sg-long", pay >= 999.995); // four-figure payouts (long shots at $25+) step the font down to fit
     N("win", "sWin", pay, SGF.money); N("profit", "sProfit", pay - state.amount, SGF.signed); N("mult", "sMult", c, SGF.mult);
-    N("cents", "sCents", c, SGF.cents); N("bal", "sBal", balance - state.amount, SGF.money);
-    if (tick) { sgMult(c, snap); sgPrice(c, snap); }
+    N("cents", "sCents", ask, SGF.cents); N("bal", "sBal", balance - state.amount, SGF.money);
+    if (tick) { sgMult(c, snap); sgPrice(ask, snap); }
     $("sProfit").classList.add("sp-pos"); $("sProfit").classList.remove("sp-neg");
     $("sPw").style.display = ""; $("sPct").style.display = "none"; $("sLose").style.display = ""; $("sLose").textContent = `$0 if ${up ? "Down" : "Up"} wins`; // the downside, plainly
     $("sMultBox").hidden = false;
@@ -3686,14 +3795,15 @@ function renderSheet(m) {
     $("sPriceLbl").textContent = "Price";
     const d = m.now - m.target, ahead = d !== 0 && (d > 0) === up;
     const held = roundPositions(m), opp = held.filter(p => p.side !== state.side); // step 21: you hold the other side, so this buy hedges it
+    if (lim) ordNote(m, up, ask, rest); else { // step 26: Limit says when it buys and that the held cash comes back if it doesn't
     $("sNote").className = "sh-note" + (urg === "hot" && !opp.length ? " hot" : "");
     if (opp.length) { if (tick) { const w = roundIfs(m, { side: state.side, stake: state.amount, payout: pay }); // the round either way after this buy, at the cadence of the numbers above
       const mine = held.length > opp.length ? "With both your sides" : `With your <b>${sideTxt(opp[0].side)} ${psUsd(sumBy(opp, p => p.stake))}</b>`;
       $("sNote").innerHTML = `${mine}: if Up wins <b class="${netCls(w.up)}">${netTxt(w.up)}</b> · if Down wins <b class="${netCls(w.down)}">${netTxt(w.down)}</b>`; } }
     else $("sNote").innerHTML = urg === "hot" ? `Closes in ${mmss(m.rem)} — the price can still move fast.`
-      : `Now <b>${fmtPrice(state.asset, m.now)}</b> · ${fmtVsTarget(state.asset, d)} · ${up ? "Up" : "Down"} is ${ahead ? "ahead" : "behind"} right now`;
+      : `Now <b>${fmtPrice(state.asset, m.now)}</b> · ${fmtVsTarget(state.asset, d)} · ${up ? "Up" : "Down"} is ${ahead ? "ahead" : "behind"} right now`; }
     b.classList.remove("cash"); b.classList.toggle("up", up); b.classList.toggle("down", !up); b.disabled = short || closed;
-    if (!busy) { const why = closed ? "Round closed" : short ? "Not enough balance" : null; sgLabel(why || `${state.copyFrom ? "Copy" : "Buy"} ${up ? "▲ Up" : "▼ Down"}`, why ? null : "$" + state.amount, f, tick); }
+    if (!busy) { const why = closed ? "Round closed" : short ? "Not enough balance" : null; sgLabel(why || (lim ? ordVerb(up, rest) : `${state.copyFrom ? "Copy" : "Buy"} ${up ? "▲ Up" : "▼ Down"}`), why ? null : "$" + state.amount, f, tick); }
   } else {
     const all = roundPositions(m), side = sellSide, ps = all.filter(p => p.side === side); if (!ps.length) { if (!busy) closeSheets(); return; } // that side is gone: never switch sides under you
     const fr = state.sellFrac, val = sumBy(ps, p => cashValue(p, m)) * fr, cost = sumBy(ps, p => p.stake) * fr, pnl = val - cost, pays = sumBy(ps, p => p.payout) * fr;
@@ -3742,11 +3852,11 @@ $("buyBtn").addEventListener("click", () => {
   fx.tap(); b.classList.add("busy");
   setTimeout(() => {
     b.classList.remove("busy"); if (!sheetOpen) return;
-    const sell = state.mode === "sell", r = sell ? confirmCashout() : confirmTrade();
+    const sell = state.mode === "sell", r = sell ? confirmCashout() : ORD.type === "limit" ? ordConfirm() : confirmTrade(); // step 26: Limit places an order (or buys now at/above the ask)
     if (!r) { render(); return; }
-    sgDone(b, r); sell ? fx.cash() : fx.buy();
+    sgDone(b, r); sell ? fx.cash() : r.order ? ordPlaceFx() : fx.buy();
     const from = b.getBoundingClientRect();
-    setTimeout(() => { closeSheets(); render(); if (sell) sgCashFly(from, r); else tfxFly(from, r); }, 640); // .ok stays on while it sinks; the next open clears it
+    setTimeout(() => { closeSheets(); render(); if (sell) sgCashFly(from, r); else if (r.order) ordFlyIn(from, r); else tfxFly(from, r); }, 640); // .ok stays on while it sinks; the next open clears it
   }, 320);
 });
 
@@ -4230,7 +4340,7 @@ function sgOpen() {
   const dock = $("dock"), fromDock = view === "market" && !!(dock && dock.offsetParent), delay = fromDock ? 45 : 0;
   if (fromDock) dock.animate([{ transform: "none" }, { transform: "translateY(4px) scale(.985)", offset: .4 }, { transform: "none" }], { duration: 300, easing: "ease-out" });
   SG.anim = sgRise(sh, delay);
-  [".sh-top", ".sh-q", ".sh-hero", ".sh-sub", ".amts", ".sh-rows", ".sh-note", ".bb-wrap"].map(q => sh.querySelector(q)).filter(Boolean).forEach((el, i) =>
+  [".sh-top", ".sh-q", ".sh-hero", ".sh-sub", ".sg-ot", ".amts", ".sh-rows", ".sh-note", ".so-list", ".bb-wrap"].map(q => sh.querySelector(q)).filter(el => el && !el.hidden).forEach((el, i) =>
     el.animate([{ opacity: 0, transform: "translateY(18px)" }, { opacity: 1, transform: "none" }], { duration: SG_IN.ms, delay: delay + 60 + i * 34, easing: SG_IN.easing, fill: "backwards" }));
   setTimeout(() => sgWinPop(1), delay + 240); // the number you could win lands last
 }
@@ -4411,6 +4521,275 @@ function sgCashFly(from, r) {
 $("buyBtn").addEventListener("pointerdown", sgPress);
 $("buyBtn").addEventListener("touchstart", () => {}, { passive: true }); // iOS Safari applies :active only when a touch listener exists
 $("amts").addEventListener("pointerdown", sgChipDown);
+
+// ---- limit orders (step 26): Market | Limit in the trade sheet ----
+// Market buys now at the price on screen, exactly as before. Limit names your price: the order waits until its side's buy price (market()'s ask)
+// comes down to it during the round, then fills AT your price into a normal position: the same lot confirmTrade makes, so the strip, Cash out,
+// the result card, Portfolio and Activity just work. A limit at or above the ask is a buy now, at the ask (never above your limit).
+// Cash: like Polymarket (max order = balance − open orders) an open order holds its cash. It leaves `balance` (what you can trade) when it is placed
+// and comes back when you cancel it or when the round ends unfilled. Home's and the Portfolio's values count it: it is still yours.
+// Where it shows: the sheet (Limit: your price on a − / + stepper, then your open orders on this market with Cancel; the switch's Limit carries
+// their count) and a small glass chip in the chart's top band on the market page (tap: the sheet in Limit). A fill: the chip turns green and the
+// bet token drops into the position strip, elsewhere a toast. No red states: a cancel or an order that didn't fill just gives the cash back.
+const ORD = { list: [], seq: 0, type: "market", limit: null, openAs: null, gone: new Map(), fxQ: [], fxT: 0, rep: 0, ptr: false, sub: null, lv: null, nv: null, chipUntil: 0, chipT: 0 };
+const ordHeld = () => sumBy(ORD.list, o => o.stake);
+const ordHere = m => ORD.list.filter(o => o.asset === state.asset && o.round === state.round && o.end === m.end);
+const ordAsk = (o, m) => o.side === "up" ? m.up : m.down;
+const ordClamp = c => Math.max(1, Math.min(99, Math.round(c)));
+const ordCents = c => c + "¢";
+// the first price a limit offers: your side's bid (its Cash out price, ask − 2¢), i.e. joining the best bid like a limit buy usually starts
+function ordDefault() { ORD.limit = ordClamp(sellCents({ side: state.side === "down" ? "down" : "up" }, market(state.asset, state.round))); }
+function ordReset() { // Reset demo (reset() calls it after tfxReset): no orders, nothing held
+  ORD.list = []; ORD.type = "market"; ORD.limit = null; ORD.openAs = null; ORD.gone.clear(); ORD.fxQ = []; clearTimeout(ORD.fxT); ORD.fxT = 0;
+  clearTimeout(ORD.chipT); ORD.chipUntil = 0;
+  const chip = $("ordChip"); if (chip) { chip.hidden = true; chip.className = "ord-chip"; chip.__h = ""; }
+  const box = $("sOrders"); if (box) { box.innerHTML = ""; box.hidden = true; }
+  if (!ORD.sub && window.PrototypeAPI && PrototypeAPI.onChange) ORD.sub = PrototypeAPI.onChange(ordChip); // the chart chip follows every render and trade
+}
+function ordOpen() { // a fresh open of the sheet (renderSheet, snap): Market, unless the chart's order chip opened it (Limit: to see or cancel them)
+  ORD.type = ORD.openAs === "limit" && state.mode !== "sell" ? "limit" : "market"; ORD.openAs = null; ORD.limit = null;
+  if (ORD.type === "limit") ordDefault();
+  ORD.gone.clear(); $("sOrders").innerHTML = "";
+}
+const ordVerb = (up, rest) => rest ? `${state.copyFrom ? "Copy" : "Place"} limit ${up ? "▲ Up" : "▼ Down"} · ${ORD.limit}¢` : `${state.copyFrom ? "Copy" : "Buy"} now ${up ? "▲ Up" : "▼ Down"}`;
+// Activity rows for an order ("Limit" placed, "Canceled", "Not filled"): the entry shape the Portfolio reads, $0 (cash only moves when it fills), a short note
+function ordLog(kind, o, note, t = simNow) {
+  const e = logEntry(kind, t, { asset: o.asset, round: o.round, end: o.end, target: o.target, side: o.side, stake: o.stake, payout: o.stake * 100 / o.limit, settled: false, copiedFrom: o.copiedFrom }, 0);
+  e.note = note; e.limit = o.limit; e.order = o.id; return e;
+}
+// the Buy slab in Limit: under the ask the order rests (its cash is held); at or above it, it is a market buy at the ask
+function ordConfirm() {
+  const m = market(state.asset, state.round), ask = state.side === "up" ? m.up : m.down, L = ORD.limit;
+  if (L == null || state.amount > balance || m.end - simNow <= 0) return null;
+  if (L >= ask) return confirmTrade();
+  balance -= state.amount; // held for the order until it fills, you cancel it or the round ends
+  const o = { id: ++ORD.seq, asset: state.asset, round: state.round, end: m.end, target: m.target, side: state.side, limit: L, stake: state.amount, t: simNow, copiedFrom: state.copyFrom || undefined };
+  ORD.list.push(o);
+  tradeLog.push(ordLog("order", o, `${L}¢ · ${psUsd(o.stake)} held`));
+  emitChange();
+  return { label: `✓ Order placed · ${sideTxt(o.side)} at ${L}¢`, order: o, copy: !!state.copyFrom };
+}
+// settle() runs this first on every sim step: an order whose side's price came down to its limit fills; one whose round ended didn't fill
+function ordMatch() {
+  if (!ORD.list.length) return;
+  let hit = false;
+  for (const o of ORD.list.slice()) {
+    const m = market(o.asset, o.round);
+    if (simNow >= o.end || m.end !== o.end) { ordDrop(o, "expired"); hit = true; }
+    else if (ordAsk(o, m) <= o.limit) { ordFill(o); hit = true; }
+  }
+  if (hit) emitChange();
+}
+function ordFill(o) { // a normal position at your price: payout (shares) = stake × 100 / limit
+  const i = ORD.list.indexOf(o); if (i < 0) return;
+  ORD.list.splice(i, 1);
+  let pos; positions.push(pos = { asset: o.asset, round: o.round, end: o.end, target: o.target, side: o.side, stake: o.stake, payout: o.stake * 100 / o.limit, settled: false,
+    copiedFrom: o.copiedFrom, t: simNow });
+  pos.stake0 = pos.stake; pos.limit = o.limit; // stake0 as confirmTrade sets it; limit = the price it filled at (the strip's Entry reads stake / payout)
+  addTierPts(pos.stake);
+  const e = logEntry("buy", simNow, pos, -pos.stake); e.note = `Filled at ${o.limit}¢`; e.order = o.id; tradeLog.push(e);
+  if (view === "market" && o.asset === state.asset && o.round === state.round) tfxAddTick({ side: pos.side, stake: pos.stake }); // the trades line: "You bought ▲ Up"
+  ORD.gone.set(o.id, "filled");
+  ordFx({ kind: "fill", o, pos });
+}
+function ordDrop(o, why) { // canceled by you, or its round ended before the price got there: the held cash comes back
+  const i = ORD.list.indexOf(o); if (i < 0) return false;
+  ORD.list.splice(i, 1); balance += o.stake;
+  const end = why === "expired";
+  tradeLog.push(ordLog(end ? "expired" : "cancel", o, `${psUsd(o.stake)} back`, end ? Math.min(simNow, o.end) : simNow));
+  ORD.gone.set(o.id, end ? "expired" : "canceled");
+  if (end) ordFx({ kind: "back", o });
+  return true;
+}
+function ordCancel(id) {
+  const o = ORD.list.find(x => x.id === id); if (!o) return;
+  fx.tap(); ordDrop(o, "canceled"); emitChange(); SG.numT = 0; render(); // (commit the sheet's numbers now, not on the next price tick)
+  if (!tfxReduced()) { const w = $("sBal").parentNode.parentNode; restartCls(w, "sg-tu"); } // Balance after takes the cash back (the Price well's green flash)
+}
+// feedback after the sim step that changed things (fills / unfilled at the close), one at a time
+function ordFx(ev) {
+  ORD.fxQ.push(ev); if (!ORD.fxT) ORD.fxT = setTimeout(ordFxRun, 0);
+  if (view === "market" && ev.o.asset === state.asset && ev.o.round === state.round) ORD.chipUntil = Math.max(ORD.chipUntil, performance.now() + 400); // the chip waits for its moment
+}
+function ordFxRun() {
+  ORD.fxT = 0; const ev = ORD.fxQ.shift(); if (!ev) return;
+  if (ev.kind === "fill") ordFilledFx(ev); else ordBackFx(ev);
+  if (ORD.fxQ.length) ORD.fxT = setTimeout(ordFxRun, 280);
+}
+const ordChipOn = () => { const c = $("ordChip"); return !!c && !c.hidden && !!c.offsetParent && !sheetOpen && view === "market"; };
+function ordFilledFx({ o, pos }) { // the buy feedback, from the order: chip → green, the bet token drops into the strip
+  const here = view === "market" && o.asset === state.asset && o.round === state.round;
+  fx.buy();
+  if (!here || !ordChipOn()) {
+    showToast(`✓ Limit filled · ${sideTxt(o.side)} at ${o.limit}¢`, `${o.asset} ${o.round} · ${money(pos.stake)} → pays ${money(pos.payout)} if ${o.asset} ends ${o.side === "up" ? "above" : "at or below"} ${fmtPrice(o.asset, o.target)}`);
+    if (here) render();
+    return;
+  }
+  const chip = $("ordChip"), from = chip.getBoundingClientRect();
+  ordChipFlash("fill", o, "Filled · you’re in", "Filled");
+  render(); // you hold a position now: the strip is there
+  const to = $("pStrip"), row = to.querySelector(`.ps-row[data-side="${o.side}"]`), at = row || to;
+  if (!to.offsetParent || tfxReduced()) { restartCls(at, "pop"); return; }
+  sgFly(from, at, `${o.side === "up" ? "▲" : "▼"} ${money(pos.stake)}`, o.side === "up" ? "up" : "down", 46, () => { restartCls(at, "pop"); sgShine(at); buzz(6); });
+}
+function ordBackFx({ o }) { // didn't fill by the close: the cash is back (neutral, like a cash out)
+  const here = view === "market" && o.asset === state.asset && o.round === state.round;
+  if (!here || !ordChipOn()) { showToast("Limit order not filled", `${o.asset} ${o.round} ended before ${sideTxt(o.side)} got to ${o.limit}¢ · your ${money(o.stake)} is back`); return; }
+  ordChipFlash("back", o, `Not filled · ${psUsd(o.stake)} back`, `${psUsd(o.stake)} back`);
+  if (!tfxReduced()) { restartCls($("bal"), "sg-land"); sgShine($("bal")); }
+}
+// placed: the sheet sinks and the order token flies up into the chart chip (or a toast when you placed it from another screen)
+function ordPlaceFx() { fxTone(587, .07, { g: .05 }); fxTone(880, .1, { g: .05, at: .06 }); buzz([8, 26, 8]); } // lighter than a buy: nothing is bought yet
+function ordFlyIn(from, r) {
+  const o = r.order, up = o.side === "up", chip = $("ordChip");
+  if (!ORD.list.includes(o)) return; // it already filled (or ended) while the sheet sank: that feedback has played
+  if (!(view === "market" && o.asset === state.asset && o.round === state.round) || !ordChipOn()) {
+    showToast(`✓ Limit order placed · ${sideTxt(o.side)} at ${o.limit}¢`, `${o.asset} ${o.round} · ${money(o.stake)} on hold · buys if ${up ? "Up" : "Down"} drops to ${o.limit}¢ before ${fmtET.format(o.end * 1000)} ET`);
+    return;
+  }
+  if (tfxReduced() || !from) { restartCls(chip, "land"); return; }
+  const first = ordHere(market(o.asset, o.round)).length === 1; if (first) chip.classList.add("wait"); // a new chip appears as the token lands
+  sgFly(from, chip, `${up ? "▲" : "▼"} ${o.limit}¢`, up ? "up" : "down", chip.offsetWidth / 2, () => { chip.classList.remove("wait"); restartCls(chip, "land"); sgShine(chip); buzz(6); });
+}
+// the chart chip (market page): your open order on this market, the one nearest to filling (with their count when there are more), live distance to its price
+function ordChip() {
+  const chip = $("ordChip"); if (!chip || view !== "market" || performance.now() < ORD.chipUntil) return;
+  const m = market(state.asset, state.round), mine = ordHere(m);
+  if (!mine.length) {
+    if (!chip.hidden && !chip.classList.contains("fade")) {
+      const hide = () => { if (!chip.classList.contains("fade")) return; chip.hidden = true; chip.classList.remove("fade"); chip.__h = ""; }; // (a flash may have taken it over)
+      chip.classList.add("fade");
+      if (tfxReduced() || !chip.animate) hide(); else { const a = chip.animate([{ opacity: 1 }, { opacity: 0, transform: "scale(.92)" }], { duration: 220, easing: "ease-in" }); a.id = "ord-fade"; a.finished.then(hide, hide); }
+    }
+    return;
+  }
+  if (chip.hidden && sheetOpen) return; // a new order's chip comes in with its token once the sheet has gone (ordFlyIn)
+  const away = o => Math.max(0, ordAsk(o, m) - o.limit), o = mine.reduce((a, b) => away(b) < away(a) ? b : a), up = o.side === "up", d = away(o);
+  chip.hidden = false; chip.classList.remove("fade");
+  chip.classList.toggle("up", up); chip.classList.toggle("down", !up); chip.classList.toggle("near", d <= 2);
+  const html = `${mine.length > 1 ? `<i class="oc-cnt" aria-hidden="true">${mine.length}</i>` : '<i class="oc-dot" aria-hidden="true"></i>'}<span class="oc-k">Limit</span><b class="oc-p"><i aria-hidden="true">${up ? "▲" : "▼"}</i> ${o.limit}¢</b><span class="oc-d">${d}¢ away</span>`; // more than one: their count instead of the live dot
+  if (chip.__h !== html) {
+    chip.__h = html; chip.innerHTML = html;
+    chip.setAttribute("aria-label", `${mine.length > 1 ? `${mine.length} limit orders. Nearest: ` : "Limit order: "}buy ${up ? "Up" : "Down"} at ${o.limit}¢, the price is ${d}¢ away. Opens the order ticket.`);
+  }
+  ordChipFit(chip);
+}
+const ordChipRoom = chip => { const card = $("chartCard"), tl = $("tlBox"); return (tl && tl.parentElement === card ? tl.offsetLeft : card.clientWidth - 46) - 8 - chip.offsetLeft; };
+function ordChipFit(chip) { // stay left of the Closes in chip. A narrow band drops the distance first ("Limit ▲ 44¢"), but when the price is
+  const room = ordChipRoom(chip), near = chip.classList.contains("near"); // within 2¢ the live distance is the news: then "Limit" goes first
+  chip.classList.remove("nol", "nod");
+  if (chip.offsetWidth <= room) return;
+  chip.classList.add(near ? "nol" : "nod"); if (chip.offsetWidth > room) chip.classList.add(near ? "nod" : "nol");
+}
+function ordChipFlash(kind, o, text, short) { // a fill ("Filled", green) or an order that didn't fill ("Not filled · $10 back") holds the chip for a moment
+  const chip = $("ordChip"); if (!chip) return;
+  clearTimeout(ORD.chipT); ORD.chipUntil = performance.now() + 1600;
+  chip.hidden = false; chip.classList.remove("fade", "near", "nol", "nod", "fill", "back", "wait"); chip.classList.add(kind);
+  chip.getAnimations().forEach(a => { if (a.id === "ord-fade") a.cancel(); });
+  chip.classList.toggle("up", o.side === "up"); chip.classList.toggle("down", o.side !== "up");
+  chip.__h = ""; chip.innerHTML = `${kind === "fill" ? '<i class="oc-ok" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.3 4.3L19 7" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></i>' : '<i class="oc-dot" aria-hidden="true"></i>'}<span class="oc-t">${text}</span>`;
+  chip.setAttribute("aria-label", kind === "fill" ? `Limit order filled: ${sideTxt(o.side)} at ${o.limit}¢` : `Limit order not filled, ${money(o.stake)} is back in your balance`);
+  if (short && chip.offsetWidth > ordChipRoom(chip)) chip.querySelector(".oc-t").textContent = short; // a narrow band: the short form
+  if (!tfxReduced()) sgPop(chip, .09);
+  ORD.chipT = setTimeout(() => { ORD.chipUntil = 0; chip.classList.remove("fill", "back"); chip.__h = ""; ordChip(); }, 1600);
+}
+// the sheet's Limit pieces (renderSheet calls this on every render, before it prices the trade)
+function ordSheet(m, sell, tick, f) {
+  const sw = $("sOrd"), lim = !sell && ORD.type === "limit", mine = sell ? [] : ordHere(m);
+  sw.hidden = sell;
+  sw.querySelectorAll("button[data-o]").forEach(x => { const on = x.dataset.o === (lim ? "limit" : "market"); x.classList.toggle("on", on); x.setAttribute("aria-pressed", on ? "true" : "false"); });
+  const n = $("sOrdN"), nt = mine.length ? String(mine.length) : ""; if (n.textContent !== nt) n.textContent = nt;
+  if (!sell) tfxLens(sw);
+  $("sPriceTile").hidden = lim; $("sLimTile").hidden = !lim;
+  const hold = $("sHold");
+  if (lim) {
+    if (ORD.limit == null) ordDefault();
+    const ask = state.side === "up" ? m.up : m.down, L = ORD.limit, rest = L < ask;
+    if (!ORD.lv) ORD.lv = MA.label($("sLimV"), { format: ordCents, minInterval: 0, timing: "snappy" }); // your own number: it moves at once
+    if (!ORD.nv) ORD.nv = MA.label($("sNowC"), { format: ordCents, minInterval: 400, timing: "snappy" });
+    sgNum(ORD.lv, "sLimV", L, ordCents, f); if (tick) sgNum(ORD.nv, "sNowC", ask, ordCents, f);
+    $("sLimDn").disabled = L <= 1; $("sLimUp").disabled = L >= 99;
+    $("sLimBox").classList.toggle("now", !rest); // at or above the price: it buys now
+    const ht = `${psUsd(state.amount)} held for the order`; if (hold.textContent !== ht) hold.textContent = ht; hold.hidden = !rest;
+  } else hold.hidden = true;
+  ordRows(m, lim ? mine : null, tick);
+}
+function ordNote(m, up, ask, rest) { // Limit: when it buys, and that the held cash comes back if it doesn't
+  const n = $("sNote"), sd = up ? "▲ Up" : "▼ Down", L = ORD.limit;
+  const h = rest ? `Buys only if ${sd} drops to <b>${L}¢</b> before the close. If not, it’s canceled and your <b>${psUsd(state.amount)}</b> comes back.`
+    : `<b>${L}¢</b> is at or above the price now, so it buys right away at <b>${ask}¢</b>, like Market.`;
+  n.className = "sh-note sg-onote"; if (n.__h !== h) { n.__h = h; n.innerHTML = h; }
+}
+// your open orders on this market (Limit only): one row each with the live distance to its price and Cancel; a filled / canceled / unfilled
+// order says so for a moment, then folds away
+function ordRows(m, want, tick) {
+  const box = $("sOrders"); if (!want) { box.hidden = true; return; } // Market / Cash out: the list waits (its rows catch up when Limit is back)
+  const have = new Map([...box.children].map(r => [+r.dataset.id, r]));
+  for (const [id, r] of have) {
+    if (want.some(o => o.id === id) || r.classList.contains("out")) continue;
+    const why = ORD.gone.get(id) || "canceled", o = r.__o;
+    r.classList.add("out", why); r.classList.remove("near");
+    r.querySelector(".so-mid").innerHTML = why === "filled" ? `<b>✓ Filled</b> at ${o.limit}¢ · you’re in` : `${why === "expired" ? "Not filled" : "Canceled"} · <b>${psUsd(o.stake)}</b> back`;
+    const x = r.querySelector(".so-x"); if (x) x.disabled = true;
+    setTimeout(() => { if (tfxReduced() || !r.animate) { r.remove(); return; }
+      r.animate([{ opacity: 1, transform: "none", height: r.offsetHeight + "px" }, { opacity: 0, transform: "scale(.97)", height: "0px", marginTop: "-5px" }], { duration: 260, easing: "ease-in", fill: "forwards" }).finished.then(() => r.remove(), () => r.remove()); }, 1100);
+  }
+  for (const o of want) {
+    let r = have.get(o.id); const fresh = !r;
+    if (fresh) {
+      r = document.createElement("div"); r.className = "so-row " + o.side; r.dataset.id = o.id; r.__o = o;
+      r.innerHTML = `<span class="ps-side ${o.side}">${sideTxt(o.side)}</span><span class="so-mid"><b>${o.limit}¢</b> · ${psUsd(o.stake)}</span><span class="so-away"></span><button class="so-x" data-cancel="${o.id}" aria-label="Cancel the ${o.side === "up" ? "Up" : "Down"} order at ${o.limit}¢ (${psUsd(o.stake)} comes back)">Cancel</button>`;
+      box.appendChild(r);
+    }
+    if (fresh || tick) { const d = Math.max(0, ordAsk(o, m) - o.limit), t = `${d}¢ away`, a = r.querySelector(".so-away"); if (a.textContent !== t) a.textContent = t; r.classList.toggle("near", d <= 2); }
+  }
+  box.hidden = !box.children.length;
+}
+// the switch: Market | Limit (GlassSeg lens via tfxLens). Locked while a trade is being placed, like the amounts
+function ordSwap() {
+  if (tfxReduced()) return;
+  const lim = ORD.type === "limit", el = lim ? $("sLimTile") : $("sPriceTile");
+  [el, $("sNote")].forEach(n => n && n.animate && n.animate([{ opacity: 0, transform: "translateY(5px)" }, { opacity: 1, transform: "none" }], { duration: 240, easing: "cubic-bezier(.2,.9,.25,1)" }));
+  const box = $("sOrders"); if (lim && !box.hidden && box.animate) box.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 280, delay: 40, easing: "cubic-bezier(.2,.9,.25,1)", fill: "backwards" });
+  setTimeout(() => sgWinPop(lim ? 1 : .55), 60); // the payout follows your price: up for a lower limit
+}
+$("sOrd").addEventListener("click", e => {
+  const b = e.target.closest("button[data-o]"), k = $("buyBtn").classList;
+  if (!b || b.classList.contains("on") || k.contains("busy") || k.contains("ok") || state.mode === "sell") return;
+  fx.tap(); ORD.type = b.dataset.o === "limit" ? "limit" : "market";
+  if (ORD.type === "limit" && ORD.limit == null) ordDefault();
+  render(); tfxLens($("sOrd"), true); ordSwap();
+});
+// the stepper: 1¢ a tap, hold to repeat (faster the longer you hold), 1-99¢. Each step re-prices "To win" and the multiplier at once
+function ordStepBy(d) {
+  const k = $("buyBtn").classList; if (!sheetOpen || state.mode === "sell" || ORD.type !== "limit" || k.contains("busy") || k.contains("ok")) return false;
+  if (ORD.limit == null) ordDefault();
+  const L = ordClamp(ORD.limit + d); if (L === ORD.limit) return false;
+  const m = market(state.asset, state.round), ask = state.side === "up" ? m.up : m.down, was = ORD.limit < ask;
+  ORD.limit = L; render();
+  if (!tfxReduced()) { const v = $("sLimBox"); restartCls(v, "bump"); if (was !== L < ask) restartCls(v, "flip"); } // crossing the price: rests <-> buys now
+  return true;
+}
+$("sLimTile").addEventListener("pointerdown", e => {
+  const btn = e.target.closest(".sl-btn"); if (!btn || btn.disabled || (e.pointerType === "mouse" && e.button !== 0)) return;
+  e.preventDefault(); ORD.ptr = true; // (no focus ring or selection from a held press; the click that follows is ignored)
+  const d = btn.id === "sLimUp" ? 1 : -1; if (!ordStepBy(d)) return;
+  fx.tap(); let n = 0; clearTimeout(ORD.rep);
+  const stop = () => { clearTimeout(ORD.rep); removeEventListener("pointerup", stop, true); removeEventListener("pointercancel", stop, true); btn.removeEventListener("pointerleave", stop);
+    setTimeout(() => { ORD.ptr = false; }, 0); sgWinPop(n ? .8 : d < 0 ? .9 : .5); };
+  const again = () => { if (!ordStepBy(d)) return stop(); n++; buzz(3); ORD.rep = setTimeout(again, n < 5 ? 110 : n < 14 ? 65 : 38); };
+  ORD.rep = setTimeout(again, 380);
+  addEventListener("pointerup", stop, true); addEventListener("pointercancel", stop, true); btn.addEventListener("pointerleave", stop);
+});
+$("sLimTile").addEventListener("click", e => { const b = e.target.closest(".sl-btn"); if (!b || ORD.ptr) return; if (ordStepBy(b.id === "sLimUp" ? 1 : -1)) { fx.tap(); sgWinPop(.6); } }); // keyboard: one step
+$("sOrders").addEventListener("click", e => { const x = e.target.closest(".so-x"); if (x && !x.disabled) ordCancel(+x.dataset.cancel); });
+for (const id of ["sLimTile", "sOrders"]) $(id).addEventListener("touchstart", () => {}, { passive: true }); // iOS Safari: :active needs a touch listener
+(() => { // the chart chip lives in the chart card's top band, left of the Closes in chip (no part of the dock)
+  const card = $("chartCard"); if (!card || $("ordChip")) return;
+  const chip = document.createElement("button"); chip.type = "button"; chip.className = "ord-chip"; chip.id = "ordChip"; chip.hidden = true;
+  card.appendChild(chip); chip.addEventListener("touchstart", () => {}, { passive: true });
+  chip.addEventListener("click", () => { const mine = ordHere(market(state.asset, state.round)); if (!mine.length || performance.now() < ORD.chipUntil) return; fx.tap(); ORD.openAs = "limit"; openTrade(mine[0].side); });
+})();
 
 // ---- settlement: neutral beat, then the result card (market on screen) or a toast (anywhere else) ----
 // Activity: one Won / Lost row per side and round (settle() credits each lot; several buys on one side are one position)
@@ -5424,6 +5803,8 @@ window.PrototypeAPI = {
   // { r: {key, secs, long}, start, end, target, now, rem, up, down, pUp }  (up/down in cents)
   getMarket: (k, r = "15m") => ASSETS[k] && ROUND[r] ? market(k, r) : undefined,
   getActivity: () => tradeLog.slice().sort((a, b) => b.t - a.t).map(x => ({ ...x, p: { ...x.p } })), // newest first: buy / won / lost / sell (cash out)
+  getHeld: () => ordHeld(), // step 26: cash held by open limit orders (getBalance() is what you can trade)
+  getOrders: () => ORD.list.map(o => ({ ...o })), // step 26: open limit orders [{ id, asset, round, end, target, side, limit (¢), stake, t, copiedFrom? }]
   onChange: cb => { listeners.add(cb); return () => listeners.delete(cb); }, // fires ~4×/s and on every trade/settlement; returns unsubscribe
   openMarket: (k, r) => openMarket(k, r),
   openTradeSheet: o => openTradeSheet(o || {}), // { asset, round, side }
@@ -5678,7 +6059,7 @@ setInterval(() => {
   function positions() { try { return (api.getPositions() || []).slice(); } catch (e) { return []; } }
   function openPositions() { return positions().filter(function (p) { return !p.settled; }).sort(function (a, b) { return a.end - b.end; }); }
   function portfolioValue() {
-    var v = +api.getBalance() || 0;
+    var v = (+api.getBalance() || 0) + (+(api.getHeld && api.getHeld()) || 0); // step 26 (tradefx): + cash held by open limit orders
     openPositions().forEach(function (p) { v += +p.stake || 0; });
     return v;
   }
@@ -5875,7 +6256,8 @@ setInterval(() => {
     $(".pf-vlabel").classList.toggle("cash", cur.vmode === "cash");
     if (cur.vmode === "cash") {
       var open = openPositions().reduce(function (s, p) { return s + (+p.stake || 0); }, 0);
-      dEl.innerHTML = "Available to trade" + (open > 0 ? " · " + esc(money(open)) + " in open positions" : "");
+      var held = +(api.getHeld && api.getHeld()) || 0; // step 26 (tradefx): cash held by open limit orders
+      dEl.innerHTML = "Available to trade" + (open > 0 ? " · " + esc(money(open)) + " in open positions" : "") + (held > 0 ? " · " + esc(money(held)) + " in open orders" : "");
     } else {
       var w = rangeWindow(history(), cur.range);
       dEl.innerHTML = '<b class="' + (w.delta < 0 ? "pf-dn" : "pf-up") + '">' + esc(money(w.delta, true)) + "</b> " + esc(w.r.label);
@@ -5919,10 +6301,10 @@ setInterval(() => {
     }
     var acts = activity();
     if (!acts.length) { el.innerHTML = '<div class="pf-empty">No activity yet</div>'; return; }
-    var LBL = { buy: "Buy", sell: "Sell", won: "Won", lost: "Lost" };
+    var LBL = { buy: "Buy", sell: "Sell", won: "Won", lost: "Lost", order: "Limit", cancel: "Canceled", expired: "Not filled" }; // step 26 (tradefx): limit orders
     el.innerHTML = acts.map(function (x) {
       var p = x.p, a = assetInfo(p), mt = marketTitle(p, a), amt = x.amount, cls = x.kind === "won" ? "pf-up" : (Math.round(amt * 100) === 0 ? "zero" : "");
-      var detail = x.kind === "buy" ? (p.payout && p.stake ? (p.payout / p.stake).toFixed(2) + "x payout" : "")
+      var detail = x.note ? x.note : x.kind === "buy" ? (p.payout && p.stake ? (p.payout / p.stake).toFixed(2) + "x payout" : "")
         : x.kind === "lost" ? money(p.stake) + " stake lost" : x.kind === "won" ? money(p.payout - p.stake, true) + " profit" : "sold early";
       return '<div class="pf-act">' + coin(a) + '<div class="m"><div class="t1">' + esc(mt.name) + '</div>' + (mt.when ? '<div class="tw">' + esc(mt.when) + '</div>' : '') +
         '<div class="t2"><span class="pf-badge ' + x.kind + '">' + LBL[x.kind] + '</span><span class="pf-dir ' + p.side + '">' + (p.side === "up" ? "▲ Up" : "▼ Down") + '</span><span>· ' + esc(ago(x.t)) + '</span></div></div>' +
@@ -6079,7 +6461,7 @@ setInterval(() => {
   /* ---- trade log (Activity) + value history, built from the real positions ---- */
   var st = { epoch: 0, known: 0, settled: {}, buyT: [], acts: [], hist: null, lastNow: 0 };
   function positionsRaw() { try { return api.getPositions() || []; } catch (e) { return []; } }
-  function value(ps) { var v = +api.getBalance() || 0; ps.forEach(function (p) { if (!p.settled) v += +p.stake || 0; }); return v; }
+  function value(ps) { var v = (+api.getBalance() || 0) + (+(api.getHeld && api.getHeld()) || 0); ps.forEach(function (p) { if (!p.settled) v += +p.stake || 0; }); return v; }
   function entry(kind, t, p, amount) {
     var s = { asset: p.asset, round: p.round, end: p.end, target: p.target, side: p.side, stake: +p.stake || 0, payout: +p.payout || 0,
       settled: !!p.settled, won: p.won, copiedFrom: p.copiedFrom };
