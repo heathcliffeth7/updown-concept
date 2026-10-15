@@ -881,13 +881,38 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   background: var(--lg-film), var(--lg-tint); -webkit-backdrop-filter: var(--lg-blur); backdrop-filter: var(--lg-blur);
   border: 1px solid var(--lg-edge); border-top-color: var(--lg-top); box-shadow: var(--lg-shadow); }
 #vMarket .dock::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1; background: var(--lg-spec); }
-.amtrow { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin-bottom: 8px; padding: 3px; border-radius: 999px; isolation: isolate;
+.amtrow { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 3px; border-radius: 999px; isolation: isolate;
   background: rgba(0,0,0,.28); box-shadow: inset 0 1px 3px rgba(0,0,0,.45), inset 0 -1px 0 rgba(255,255,255,.04); }
 .amtrow button { position: relative; z-index: 1; height: 32px; border-radius: 999px; font-size: 14.5px; font-weight: 700; color: rgba(242,243,247,.6); font-variant-numeric: tabular-nums;
   transition: color .25s, transform .12s; }
 .amtrow button.on { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
 .amtrow button:active { transform: scale(.95); }
-.dock.holding .amtrow { display: none; }
+/* step 28: the amount line = the chips + the "⚡ One tap" switch. It stays on the dock while you hold a position (under the strip, right above
+   the buttons it sets): with One tap on, every tap buys the amount shown here */
+.amtline { display: flex; align-items: stretch; gap: 6px; margin-bottom: 8px; }
+.amtline .amtrow { flex: 1 1 auto; min-width: 0; }
+/* the switch: a groove like the chips'. On = the chips' glass lens fills it and the bolt lights up in the app's yellow (its only colour) */
+.otap { position: relative; flex: none; display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 0 13px 0 11px; border-radius: 999px; isolation: isolate;
+  font-size: 13.5px; font-weight: 700; letter-spacing: -.005em; color: rgba(242,243,247,.6); white-space: nowrap; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  background: rgba(0,0,0,.28); box-shadow: inset 0 1px 3px rgba(0,0,0,.45), inset 0 -1px 0 rgba(255,255,255,.04); transition: color .25s, transform .12s, text-shadow .25s; }
+.otap:active { transform: scale(.95); }
+.otap:focus-visible { outline: 2px solid rgba(255,255,255,.55); outline-offset: 2px; }
+.otap.on { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+.ot-lens { position: absolute; inset: 3px; z-index: -1; border-radius: inherit; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity .2s;
+  background: linear-gradient(180deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.075) 52%, rgba(255,255,255,.11) 100%);
+  -webkit-backdrop-filter: blur(10px) saturate(190%) brightness(1.2); backdrop-filter: blur(10px) saturate(190%) brightness(1.2);
+  border: 1px solid rgba(255,255,255,.11); border-top-color: rgba(255,255,255,.36); border-bottom-color: rgba(255,255,255,.05);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.26), inset 0 -5px 10px rgba(0,0,0,.16), 0 3px 10px rgba(0,0,0,.28); }
+.otap.on .ot-lens { opacity: 1; }
+.ot-sheen { position: absolute; inset: 0; border-radius: inherit; opacity: .55;
+  background: radial-gradient(85% 75% at 28% -10%, rgba(255,255,255,.3), transparent 62%), radial-gradient(60% 50% at 80% 120%, rgba(255,255,255,.08), transparent 70%); }
+.ot-glint { position: absolute; top: -40%; bottom: -40%; left: 0; width: 50%; opacity: 0; transform: translateX(-130%) skewX(-18deg);
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.1) 28%, rgba(255,255,255,.34) 50%, rgba(255,255,255,.1) 72%, rgba(255,255,255,0)); }
+.ot-glint.go { animation: otGlint .7s cubic-bezier(.3,.6,.3,1); }
+@keyframes otGlint { 0% { opacity: 1; transform: translateX(-130%) skewX(-18deg); } 100% { opacity: 1; transform: translateX(260%) skewX(-18deg); } }
+.ot-bolt { flex: none; display: block; fill: rgba(255,196,0,0); stroke: currentColor; stroke-width: 2; stroke-linejoin: round; transition: fill .25s, stroke .25s, filter .25s; }
+.otap.on .ot-bolt { fill: var(--yellow); stroke: var(--yellow); filter: drop-shadow(0 0 5px rgba(255,196,0,.55)); }
+@media (hover: hover) { .otap:not(.on):hover { color: rgba(242,243,247,.82); } }
 .pstrip { display: none; align-items: center; gap: 10px; height: 58px; margin-bottom: 8px; padding: 0 5px 0 12px; border-radius: 18px;
   background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02)), rgba(0,0,0,.22); border: 1px solid rgba(255,255,255,.08); border-top-color: rgba(255,255,255,.18);
   transition: border-color .3s, background .3s; }
@@ -958,6 +983,49 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 #vMarket .tb:active { transform: scale(.97); filter: brightness(.94); }
 #vMarket .tb.bump .p { animation: tfxBump .32s ease-out; }
 @keyframes tfxBump { 0% { transform: none; } 40% { transform: translateY(-2px) scale(1.04); } 100% { transform: none; } }
+/* step 28 · One tap on: the buttons say a tap buys now (a ⚡ before the amount, a lit inner rim). A tap = press + ripple, "✓ Bought $10" and a
+   ring rings out (JS: tfxDockSide, otDone). Not enough balance: the button says so and is muted (no red); a tap only explains it */
+#vMarket .tb .ot-b { display: none; width: 12px; height: 12px; margin-right: 3px; vertical-align: -1px; fill: currentColor; }
+#vMarket .dock.ot-on .tb .ot-b { display: inline-block; }
+#vMarket .dock.ot-on .tb { box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.34), inset 0 1px 0 rgba(255,255,255,.35), inset 0 -6px 14px rgba(0,0,0,.14), 0 6px 18px rgba(0,0,0,.32);
+  touch-action: manipulation; } /* a quick double tap is one buy (the lock), never a page zoom */
+#vMarket .tb .ot-nb { display: none; font-size: 14.5px; font-weight: 650; opacity: .92; white-space: nowrap; }
+#vMarket .dock.ot-on .tb.ot-short > .p { display: none; }
+#vMarket .dock.ot-on .tb.ot-short > .ot-nb { display: block; }
+#vMarket .dock.ot-on .tb.ot-short { filter: saturate(.4) brightness(.8); }
+#vMarket .tb > .k, #vMarket .tb > .p, #vMarket .tb > .ot-nb { transition: opacity .16s, transform .24s cubic-bezier(.2,.9,.3,1); }
+#vMarket .tb.ot-done > .k, #vMarket .tb.ot-done > .p, #vMarket .tb.ot-done > .ot-nb { opacity: 0; transform: translateY(-12px); }
+#vMarket .tb .ot-ok { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 17px; font-weight: 750; white-space: nowrap;
+  pointer-events: none; opacity: 0; transform: translateY(12px); transition: opacity .14s, transform .2s; }
+#vMarket .tb.ot-done .ot-ok { opacity: 1; transform: none; transition: opacity .18s ease-out .04s, transform .44s cubic-bezier(.2,1.4,.4,1) .04s; }
+#vMarket .tb .ot-chk { width: 24px; height: 24px; flex: none; border-radius: 50%; display: grid; place-items: center; }
+#vMarket .tb.up .ot-chk { background: var(--up-ink); color: #2ee88a; } #vMarket .tb.down .ot-chk { background: #fff; color: #e5305a; }
+#vMarket .tb.ot-done .ot-chk { animation: otChk .52s cubic-bezier(.2,1.6,.4,1) both; }
+#vMarket .tb .ot-chk path { stroke-dasharray: 22; stroke-dashoffset: 22; }
+#vMarket .tb.ot-done .ot-chk path { animation: otDraw .3s cubic-bezier(.3,.7,.3,1) .14s forwards; }
+@keyframes otChk { 0% { transform: scale(.2) rotate(-30deg); opacity: 0; } 55% { transform: scale(1.18) rotate(5deg); opacity: 1; } 100% { transform: none; opacity: 1; } }
+@keyframes otDraw { to { stroke-dashoffset: 0; } }
+#vMarket .tb .ot-gl, #vMarket .tb .ot-rip { position: absolute; z-index: -1; pointer-events: none; }
+#vMarket .tb .ot-gl { top: -30%; bottom: -30%; left: 0; width: 42%; transform: translateX(-130%) skewX(-18deg);
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.16) 30%, rgba(255,255,255,.5) 50%, rgba(255,255,255,.16) 70%, rgba(255,255,255,0)); }
+#vMarket .tb .ot-rip { border-radius: 50%; will-change: transform, opacity;
+  background: radial-gradient(circle, rgba(255,255,255,.52) 0%, rgba(255,255,255,.26) 42%, rgba(255,255,255,.74) 60%, rgba(255,255,255,.22) 65%, rgba(255,255,255,0) 70%); }
+.ot-wave { position: absolute; z-index: 3; border-radius: 19px; pointer-events: none; opacity: 0; --ot-rgb: 0,191,99;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.8), 0 0 22px rgba(var(--ot-rgb),.55); }
+.ot-wave.down { --ot-rgb: 232,52,92; }
+/* the tip above the dock (One tap on / off, Not enough balance): glass like the chart's "Live calls on" tip, over what it is about (JS: otTip) */
+.ottip { position: absolute; left: 0; bottom: calc(100% + 10px); z-index: 7; width: max-content; max-width: calc(100% - 12px); padding: 8px 12px 9px; border-radius: 14px;
+  font-size: 12.5px; font-weight: 550; line-height: 1.35; color: var(--muted); pointer-events: none;
+  background: var(--lg-film), rgba(24,24,36,.9); border: 1px solid var(--lg-edge); border-top-color: var(--lg-top);
+  box-shadow: 0 10px 28px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.16); opacity: 0; transform: translateY(6px); transition: opacity .2s, transform .3s cubic-bezier(.2,.9,.25,1); }
+.ottip.show { opacity: 1; transform: none; }
+.ottip b { display: block; margin-bottom: 1px; font-size: 13px; font-weight: 750; color: var(--text); }
+@media (prefers-reduced-motion: reduce) {
+  .otap, .ot-lens, .ot-bolt, .ottip, #vMarket .tb > .k, #vMarket .tb > .p, #vMarket .tb > .ot-nb, #vMarket .tb .ot-ok, #vMarket .tb.ot-done .ot-ok { transition: none !important; }
+  .ot-glint.go, #vMarket .tb.ot-done .ot-chk, #vMarket .tb.ot-done .ot-chk path { animation: none !important; }
+  #vMarket .tb.ot-done .ot-chk path { stroke-dashoffset: 0; }
+  .otap:active { transform: none; }
+}
 
 /* result card: slides up over the dock — win (count-up + confetti) or a calm, plain loss */
 #vMarket .result { position: absolute; left: 10px; right: 10px; bottom: 14px; z-index: 12; padding: 15px 16px 14px; border-radius: 28px; isolation: isolate;
@@ -1815,12 +1883,16 @@ html.sg-lens #tradeSheet > .sg-edge { backdrop-filter: url(#sgLens) blur(1.6px) 
             </div>
           </div>
           <div class="dock" id="dock">
-            <div class="amtrow" id="amtRow"><button data-a="5">$5</button><button data-a="10" class="on">$10</button><button data-a="25">$25</button><button data-a="50">$50</button></div>
             <div class="pstrip" id="pStrip"></div>
-            <div class="tbtns">
-              <button class="tb up" id="btnUp"><span class="k"><span>▲ Up</span><b id="cUp"></b></span><span class="p"><span class="amt"></span> → <span id="pUp"></span></span></button>
-              <button class="tb down" id="btnDown"><span class="k"><span>▼ Down</span><b id="cDown"></b></span><span class="p"><span class="amt"></span> → <span id="pDown"></span></span></button>
+            <div class="amtline" id="amtLine">
+              <div class="amtrow" id="amtRow"><button data-a="5">$5</button><button data-a="10" class="on">$10</button><button data-a="25">$25</button><button data-a="50">$50</button></div>
+              <button class="otap" id="oneTap" type="button" role="switch" aria-checked="false"><i class="ot-lens" aria-hidden="true"><i class="ot-sheen"></i><i class="ot-glint"></i></i><svg class="ot-bolt" width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg><span class="ot-l">One tap</span></button>
             </div>
+            <div class="tbtns">
+              <button class="tb up" id="btnUp"><span class="k"><span>▲ Up</span><b id="cUp"></b></span><span class="p"><svg class="ot-b" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg><span class="amt"></span> → <span id="pUp"></span></span><span class="ot-nb">Not enough balance</span><span class="ot-ok" aria-hidden="true"><i class="ot-chk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.3 4.3L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></i><span class="ot-okt"></span></span></button>
+              <button class="tb down" id="btnDown"><span class="k"><span>▼ Down</span><b id="cDown"></b></span><span class="p"><svg class="ot-b" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg><span class="amt"></span> → <span id="pDown"></span></span><span class="ot-nb">Not enough balance</span><span class="ot-ok" aria-hidden="true"><i class="ot-chk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.3 4.3L19 7" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></i><span class="ot-okt"></span></span></button>
+            </div>
+            <div class="ottip" id="otTip" aria-hidden="true"></div><span class="ps-sr" id="otSay" role="status" aria-live="polite"></span>
           </div>
           <div class="result" id="result" role="status" aria-live="polite"></div>
           <canvas class="confetti" id="confetti"></canvas>
@@ -3235,6 +3307,7 @@ function renderMarket() {
   document.querySelectorAll("#dock .tb .amt").forEach(n => { if (n.textContent !== "$" + amt) n.textContent = "$" + amt; });
   NA.pUp[f](amt * 100 / m.up); NA.pDown[f](amt * 100 / m.down);
   $("amtRow").querySelectorAll("button").forEach(b => b.classList.toggle("on", +b.dataset.a === amt)); tfxLens($("amtRow"));
+  tfxOneTap(m); // step 28: the One tap switch and what each button says a tap does (⚡ buy now / Not enough balance)
   const trKey = `${state.asset}|${state.round}|${m.start}`; if (TFX.trKey !== trKey) { TFX.trKey = trKey; TFX.extra = 0; }
   const tr = `${traders(state.asset, m) + TFX.extra} trading`; if ($("social").dataset.t !== tr) { $("social").dataset.t = tr; $("social").innerHTML = `<i></i>${tr}`; }
   NA.bal.set(TFX.holdBal ?? balance); // held at the pre-settlement value until a win is revealed, then it rolls up
@@ -3684,8 +3757,8 @@ $("seg").addEventListener("click", e => {
 });
 $("back").addEventListener("click", () => showView(lastTab));
 $("tabbar").addEventListener("click", e => { const b = e.target.closest("button[data-v]"); if (b) showView(b.dataset.v); });
-$("btnUp").addEventListener("click", () => openTrade("up"));
-$("btnDown").addEventListener("click", () => openTrade("down"));
+$("btnUp").addEventListener("click", () => tfxDockSide("up"));
+$("btnDown").addEventListener("click", () => tfxDockSide("down"));
 $("scrim").addEventListener("click", closeSheets);
 $("dBtn").addEventListener("click", closeSheets);
 $("amts").addEventListener("click", e => { const b = e.target.closest("button"), k = $("buyBtn").classList; if (!b || b.classList.contains("on") || k.contains("busy") || k.contains("ok")) return; fx.tap(); const sell = !!b.dataset.f, was = sell ? state.sellFrac : state.amount; if (sell) state.sellFrac = +b.dataset.f; else state.amount = +b.dataset.a; render(); tfxLens($("amts"), true); sgAmount(was, sell ? state.sellFrac : state.amount); });
@@ -3914,6 +3987,112 @@ function tfxTime(m) {
     TFX.lastBeat = s; restartCls(box, "beat");
     if ($("dock").classList.contains("holding")) { restartCls($("chartCard"), "beat"); fx.tick(); }
   }
+}
+
+// ---- One tap (step 28): buy straight from the dock, no ticket ----
+// A glass "⚡ One tap" switch sits next to the amount chips (#amtLine). It stays on the dock while you hold a position (under the strip), so the
+// amount and the switch are always right above the buttons they set. On: ▲ Up / ▼ Down buy the chosen amount at the price on the button through
+// the sheet's own buy (confirmTrade: balance, position, Activity, the "You bought" line), and the dock confirms it: the button presses in with a
+// ripple, turns into "✓ Bought $10" while a ring rings out, the bet token flies into the position strip, plus the buy tone / haptic.
+// The buttons say what a tap does: a ⚡ before the amount, or "Not enough balance" (then a tap only explains it in a tip and buys nothing).
+// A second tap within OT_LOCK ms is ignored, so a double tap is one buy. Off: the buttons open the ticket exactly as before.
+// The choice is remembered (localStorage, when the browser allows it). The result card's "Next round" still opens the ticket: it never buys.
+const OT = { on: false, lockUntil: 0, tipT: 0 };
+const OT_KEY = "updown.oneTap", OT_LOCK = 700, OT_DONE = 900;
+try { OT.on = localStorage.getItem(OT_KEY) === "1"; } catch (e) { /* storage blocked: stays off */ }
+function tfxOneTap(m) { // from renderMarket: the switch, the dock's mode and what each button says a tap does (its aria-label too)
+  const on = OT.on, short = on && state.amount > balance, sw = $("oneTap");
+  $("dock").classList.toggle("ot-on", on);
+  if (sw.classList.contains("on") !== on) { sw.classList.toggle("on", on); sw.setAttribute("aria-checked", on ? "true" : "false"); }
+  for (const s of ["up", "down"]) {
+    const b = $(s === "up" ? "btnUp" : "btnDown"), c = s === "up" ? m.up : m.down, nm = s === "up" ? "Up" : "Down";
+    b.classList.toggle("ot-short", short);
+    const lbl = !on ? null : short ? `${nm}: not enough balance for ${psUsd(state.amount)}` : `Buy ${nm} now: ${psUsd(state.amount)} at ${c}¢, pays ${money(state.amount * 100 / c)}`;
+    if (lbl === null) b.removeAttribute("aria-label"); else if (b.getAttribute("aria-label") !== lbl) b.setAttribute("aria-label", lbl);
+  }
+}
+function tfxDockSide(side) { // the dock's ▲ Up / ▼ Down (step_tradefx.py wires both buttons here)
+  if (!OT.on) { openTrade(side); fx.tap(); return; } // off: the ticket, exactly as before
+  const b = $(side === "up" ? "btnUp" : "btnDown"), now = performance.now();
+  if (sheetOpen || now < OT.lockUntil) return; // a second tap right after a buy is the same tap: one buy
+  if (state.amount > balance) { otNope(b, `<b>Not enough balance</b>${otShortTxt()}`); return; }
+  const from = b.getBoundingClientRect();
+  state.side = side; // the sheet's own buy (as both/shots_both.py's __buy): confirmTrade() at the live price, the one on the button
+  const r = confirmTrade(); if (!r) { render(); return; } // (it refuses only what is checked above)
+  OT.lockUntil = now + OT_LOCK;
+  render(); otSettle(side); otDone(b, r); fx.buy();
+  tfxFly(from, r); // the bet token flies into the position strip (it appears with this buy, or adds it up)
+  $("otTip").classList.remove("show"); otSay(`Bought ${side === "up" ? "Up" : "Down"} ${psUsd(r.pos.stake)} at ${Math.round(r.pos.stake * 100 / r.pos.payout)}¢, pays ${money(r.pos.payout)}`);
+}
+function otSettle(side) { // the button shows the live price now (its labels otherwise commit at most every 1.5 s): the price you touch is the price you get
+  const up = side === "up", m = market(state.asset, state.round), c = up ? m.up : m.down, pay = state.amount * 100 / c;
+  for (const [lbl, id, v, t] of [[up ? NA.cUp : NA.cDown, up ? "cUp" : "cDown", c, Math.round(c) + "¢"], [up ? NA.pUp : NA.pDown, up ? "pUp" : "pDown", pay, moneyShort(pay)]]) {
+    lbl.set(v); const L = $(id).__maLabel; if (L && L.text !== t) L.commit(t);
+  }
+}
+function otDone(b, r) { // the tapped button: "✓ Bought $10" for a moment while a ring rings out around it and a glint crosses it
+  b.querySelector(".ot-okt").textContent = `Bought ${psUsd(r.pos.stake)}`;
+  clearTimeout(b._otT); b.classList.remove("ot-done"); void b.offsetWidth; b.classList.add("ot-done");
+  b._otT = setTimeout(() => b.classList.remove("ot-done"), OT_DONE);
+  if (tfxReduced() || !b.animate) return;
+  const ring = document.createElement("i"), gl = document.createElement("i"), w = b.offsetWidth, h = b.offsetHeight, rm = el => () => el.remove();
+  ring.className = "ot-wave " + r.pos.side; gl.className = "ot-gl";
+  Object.assign(ring.style, { left: b.offsetLeft + "px", top: b.offsetTop + "px", width: w + "px", height: h + "px" });
+  $("dock").appendChild(ring); b.appendChild(gl);
+  ring.animate([{ opacity: .95, transform: "none" }, { opacity: 0, transform: `scale(${(1 + 20 / w).toFixed(3)},${(1 + 20 / h).toFixed(3)})` }], { duration: 760, easing: "cubic-bezier(.2,.7,.3,1)" }).finished.then(rm(ring), rm(ring));
+  gl.animate([{ transform: "translateX(-130%) skewX(-18deg)" }, { transform: "translateX(330%) skewX(-18deg)" }], { duration: 720, easing: "cubic-bezier(.3,.6,.3,1)" }).finished.then(rm(gl), rm(gl));
+}
+function otNope(b, html) { // a tap that can't buy: the button shakes no (no red), the tip says why
+  fxTone(392, .05, { type: "triangle", g: .03 }); fxTone(294, .07, { type: "triangle", g: .03, at: .07 }); buzz([8, 50, 8]);
+  if (!tfxReduced() && b.animate) b.animate([{ transform: "none" }, { transform: "translateX(-6px)", offset: .16 }, { transform: "translateX(5px)", offset: .38 },
+    { transform: "translateX(-3px)", offset: .6 }, { transform: "translateX(1.5px)", offset: .8 }, { transform: "none" }], { duration: 420, easing: "ease-out" });
+  otTip(html, b);
+}
+function otTip(html, anchor) { // a glass tip above the dock, centred over what it is about (kept inside the dock's width); it goes away by itself
+  const t = $("otTip"), dock = $("dock");
+  t.innerHTML = html; t.style.left = "0px";
+  const w = t.offsetWidth, ax = anchor.offsetLeft + anchor.offsetWidth / 2;
+  t.style.left = Math.max(6, Math.min(dock.clientWidth - w - 6, ax - w / 2)).toFixed(1) + "px";
+  t.classList.add("show"); clearTimeout(OT.tipT); OT.tipT = setTimeout(() => t.classList.remove("show"), 2600);
+  otSay(t.innerText.replace(/\s*\n\s*/g, ". "));
+}
+function otSay(text) { // screen readers: #otSay is a polite live region (the tip and the ✓ are visual only)
+  const s = $("otSay"); s.textContent = ""; requestAnimationFrame(() => { s.textContent = text; });
+}
+const otShortTxt = () => `You have ${money(balance)}${balance >= AMTS[0] ? ". Pick a smaller amount." : ", less than the smallest amount."}`;
+function otToggle() {
+  OT.on = !OT.on; try { localStorage.setItem(OT_KEY, OT.on ? "1" : "0"); } catch (e) { /* not remembered, still works */ }
+  fx.tap(); render(); otSwitchFx(OT.on);
+  otTip(!OT.on ? `<b>One tap is off</b>Up and Down open the ticket first.` : state.amount > balance ? `<b>One tap is on</b>${otShortTxt()}`
+    : `<b>One tap is on</b>Tapping Up or Down buys ${psUsd(state.amount)} at once.`, $("oneTap"));
+}
+function otSwitchFx(on) { // on: the glass lens springs into the groove, a glint crosses it and the bolt zaps; off: the lens sinks away
+  const sw = $("oneTap"), lens = sw.querySelector(".ot-lens"), bolt = sw.querySelector(".ot-bolt");
+  if (tfxReduced() || !lens.animate) return;
+  if (!on) { lens.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "scale(.82,.66)" }], { duration: 200, easing: "cubic-bezier(.4,0,.8,.4)" }); return; }
+  lens.animate([{ opacity: 0, transform: "scale(.55,.4)" }, { opacity: 1, transform: "scale(1.07,1.12)", offset: .42 }, { transform: "scale(.985,.97)", offset: .7 }, { opacity: 1, transform: "none" }],
+    { duration: 460, easing: "cubic-bezier(.2,.8,.3,1)" });
+  restartCls(sw.querySelector(".ot-glint"), "go");
+  bolt.animate([{ transform: "none" }, { transform: "scale(1.38) rotate(-12deg)", offset: .34 }, { transform: "scale(.92) rotate(4deg)", offset: .68 }, { transform: "none" }], { duration: 480, easing: "ease-out" });
+}
+function otPress(e) { // One tap: the button presses in with a ripple from the finger (the sheet's Buy slab feel) and springs back on release
+  const b = e.currentTarget;
+  if (!OT.on || sheetOpen || performance.now() < OT.lockUntil || b.classList.contains("ot-short") || (e.pointerType === "mouse" && e.button !== 0)) return;
+  otSettle(b.id === "btnUp" ? "up" : "down");
+  if (tfxReduced() || !b.animate) return;
+  const r = b.getBoundingClientRect(), k = b.offsetWidth / r.width || 1, x = (e.clientX - r.left) * k, y = (e.clientY - r.top) * k;
+  const d = 2.4 * b.offsetHeight, far = 2 * Math.hypot(Math.max(x, b.offsetWidth - x), Math.max(y, b.offsetHeight - y)) / d, rip = document.createElement("i");
+  rip.className = "ot-rip"; Object.assign(rip.style, { width: d + "px", height: d + "px", left: x - d / 2 + "px", top: y - d / 2 + "px" }); b.appendChild(rip);
+  const ra = rip.animate([{ transform: "scale(.05)", opacity: 1 }, { transform: "scale(1)", opacity: .8, offset: .4 }, { transform: `scale(${far.toFixed(2)})`, opacity: 0 }], { duration: 760, easing: "cubic-bezier(.2,.7,.3,1)" });
+  ra.finished.then(() => rip.remove(), () => rip.remove());
+  if (b._otSq) b._otSq.cancel();
+  b._otSq = b.animate([{ transform: "scale(1)" }, { transform: "scale(.955)" }], { duration: 110, easing: "cubic-bezier(.2,.8,.2,1)", fill: "forwards" });
+  const up = () => { removeEventListener("pointerup", up, true); removeEventListener("pointercancel", up, true); otRelease(b); };
+  addEventListener("pointerup", up, true); addEventListener("pointercancel", up, true);
+}
+function otRelease(b) {
+  if (b._otSq) { b._otSq.cancel(); b._otSq = null; }
+  if (!tfxReduced() && b.animate) b.animate([{ transform: "scale(.955)" }, { transform: "scale(1.02)", offset: .42 }, { transform: "scale(.995)", offset: .74 }, { transform: "none" }], { duration: 400, easing: "ease-out" });
 }
 
 // ---- cash out: one side at a time (state.sellSide). Holding both, the other side is never touched ----
@@ -4754,7 +4933,8 @@ $("amtRow").addEventListener("click", e => {
   restartCls($("btnUp"), "bump"); restartCls($("btnDown"), "bump");
 });
 $("pStrip").addEventListener("click", e => { const b = e.target.closest(".ps-cash"); if (b && !b.disabled) openCashout(b.dataset.side); }); // each side's own Cash out
-$("btnUp").addEventListener("click", () => fx.tap()); $("btnDown").addEventListener("click", () => fx.tap());
+$("oneTap").addEventListener("click", otToggle); // step 28: ▲ Up / ▼ Down clicks go to tfxDockSide (wired in step_tradefx.py; off it plays fx.tap() as these did)
+$("btnUp").addEventListener("pointerdown", otPress); $("btnDown").addEventListener("pointerdown", otPress);
 $("result").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   if (b.id === "rsX") { tfxHideResult(); return; }
