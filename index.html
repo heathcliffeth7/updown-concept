@@ -912,6 +912,31 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .ps-cash b { font-size: 16px; font-weight: 750; font-variant-numeric: tabular-nums; }
 .ps-cash:active { transform: scale(.95); }
 .ps-cash:disabled { opacity: .45; }
+/* step 21: holding both Up and Down. A row per side (its own stake → payout, Winning / Losing, Cash out for that side only), tinted by its own state,
+   then the round either way. The dock grows by about 70 px; the chart gives it up (the Up / Down buttons never move off screen). */
+.pstrip.ps-dual { height: auto; flex-direction: column; align-items: stretch; gap: 3px; padding: 4px; }
+.ps-row { position: relative; display: flex; align-items: center; gap: 9px; height: 44px; padding: 0 4px 0 6px; border-radius: 14px; border: 1px solid transparent;
+  transition: background .3s, border-color .3s; }
+.ps-row.win { background: linear-gradient(90deg, rgba(0,191,99,.17), rgba(0,191,99,.03) 74%); border-color: rgba(0,191,99,.3); }
+.ps-row.lose { background: linear-gradient(90deg, rgba(224,38,83,.17), rgba(224,38,83,.03) 74%); border-color: rgba(224,38,83,.3); }
+.ps-row.pop { animation: tfxPop .5s cubic-bezier(.2,1.45,.4,1); }
+.ps-row .ps-side { flex: none; min-width: 64px; text-align: center; } /* one width for ▲ Up and ▼ Down: the amounts line up */
+.ps-mid { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; } /* stake → payout over its own Winning / Losing, like the one-side strip */
+.ps-amt { font-size: 14px; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.ps-amt .ar { color: var(--dim); font-weight: 500; }
+.ps-stt { display: flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; line-height: 1.2; color: var(--muted); white-space: nowrap; }
+.ps-stt::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+.ps-row.win .ps-stt { color: var(--green); } .ps-row.lose .ps-stt { color: #ff5c7a; }
+.ps-row .ps-cash { height: 36px; min-width: 84px; padding: 0 10px; border-radius: 12px; line-height: 1.1; }
+.ps-row .ps-cash > span { font-size: 10px; }
+.ps-row .ps-cash b { font-size: 14.5px; }
+.ps-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ps-if { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; column-gap: 7px; padding: 3px 6px 2px; font-size: 12px; font-weight: 600; color: var(--muted);
+  white-space: nowrap; font-variant-numeric: tabular-nums; } /* wraps (it never clips) if four-figure results meet a narrow phone */
+.ps-if > span { opacity: .6; transition: opacity .3s; } .ps-if > span.now { opacity: 1; } /* the outcome the price points to right now */
+.ps-if > i { font-style: normal; color: var(--dim); }
+.ps-if b, .sh-note b.ps-gain, .sh-note b.ps-loss, .sh-note b.ps-even { font-weight: 750; }
+.ps-if b.ps-gain, .sh-note b.ps-gain { color: #22dc80; } .ps-if b.ps-loss, .sh-note b.ps-loss { color: #ff5c7a; } .ps-if b.ps-even, .sh-note b.ps-even { color: var(--text); }
 .tbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 /* Up / Down: tinted glass — a specular top film over solid colour, so it reads as a lit glass button and stays high-contrast */
 #vMarket .tb, #result .rs-b, .buybtn.up, .buybtn.down, .sh-side.up, .sh-side.down { position: relative; overflow: hidden; isolation: isolate; }
@@ -954,6 +979,20 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .rs-next .nl { flex: 1; font-size: 13px; color: var(--muted); white-space: nowrap; } .rs-next .nl b { color: var(--text); font-variant-numeric: tabular-nums; }
 #result .rs-b { height: 40px; padding: 0 16px; border-radius: 14px; font-size: 15px; font-weight: 750; border: 1px solid rgba(255,255,255,.16); border-top-color: rgba(255,255,255,.42); }
 #result .rs-b.up { background: #11c56d; color: var(--up-ink); } #result .rs-b.down { background: #e5305a; color: #fff; }
+/* step 21: a round with both sides or a cash out: a line per side (in → back, how it ended); the big number is the whole round */
+.rs-v.even { color: #f2f3f7; }
+.rs-even { margin-top: 3px; font-size: 13px; color: var(--muted); }
+.rs-legs { margin-top: 9px; display: flex; flex-direction: column; gap: 6px; }
+.rs-leg { display: flex; align-items: baseline; gap: 9px; font-size: 14px; font-variant-numeric: tabular-nums; } /* baseline: a two-line leg keeps its chips on the first line */
+.rs-leg .ps-side { flex: none; min-width: 64px; text-align: center; }
+.rs-io { flex: 1; min-width: 0; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rs-io .ar { color: var(--dim); }
+.rs-io b { color: var(--text); font-weight: 700; }
+.rs-io small { display: block; margin-top: 1px; font-size: 11.5px; color: var(--dim); }
+.rs-res { flex: none; font-size: 12.5px; font-weight: 750; padding: 2px 8px; border-radius: 8px; color: var(--text); background: rgba(255,255,255,.08); }
+.rs-leg.won .rs-res { color: var(--green); background: rgba(0,191,99,.15); } .rs-leg.won .rs-io b { color: #22dc80; }
+.rs-leg.lost .rs-res { color: #ff5c7a; background: rgba(224,38,83,.13); }
+.rs-legs + .rs-f { margin-top: 8px; }
 .confetti { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 13; }
 /* the bet token (buy -> position strip) and the cash token (cash out -> balance pill): small tinted glass pills, flown by sgFly() in tradefx.js */
 .fly { position: absolute; left: 0; top: 0; z-index: 40; padding: 7px 13px; border-radius: 999px; font-size: 15px; font-weight: 800; pointer-events: none; white-space: nowrap;
@@ -1058,6 +1097,7 @@ html.sg-lens #tradeSheet > .sg-edge { backdrop-filter: url(#sgLens) blur(1.6px) 
 .sg-ring .rc-crown { stroke: currentColor; opacity: .85; }
 .sg-cdt { font-size: 16px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; transition: color .3s; }
 .sh-top.tight .sg-coin { display: none; } /* a long market name (Cash out: "ETH · 15m · ▲ Up") gets the room */
+.sh-q b.sg-sd.up { color: #2ee88a; } .sh-q b.sg-sd.down { color: #ff5c7a; } /* step 21: the side a cash out sells */
 .sg-cd.warn .sg-cdt, .sg-cd.warn .sg-ring { color: var(--yellow); }
 .sg-cd.hot { background: var(--lg-film), rgba(224,38,83,.24); border-color: rgba(255,92,122,.42); border-top-color: rgba(255,160,178,.55); }
 .sg-cd.hot .sg-cdt, .sg-cd.hot .sg-ring { color: #ff5c7a; }
@@ -1201,7 +1241,7 @@ html.sg-lens #tradeSheet > .sg-edge { backdrop-filter: url(#sgLens) blur(1.6px) 
   #vMarket .result { bottom: max(10px, env(safe-area-inset-bottom)); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .pm-tl.beat .pm-time, #vMarket .chart.beat, .pstrip.pop, .pstrip.flash, .cbtn.nudge, .result.win .rs-v, .buybtn.ok, #vMarket .tb.bump .p { animation: none !important; }
+  .pm-tl.beat .pm-time, #vMarket .chart.beat, .pstrip.pop, .pstrip.flash, .ps-row.pop, .cbtn.nudge, .result.win .rs-v, .buybtn.ok, #vMarket .tb.bump .p { animation: none !important; }
   #app .tabbar, #vMarket .result { transition: none; }
 }
 /* TRADEFX:CSS:END */
@@ -1693,7 +1733,7 @@ html.sg-lens #tradeSheet > .sg-edge { backdrop-filter: url(#sgLens) blur(1.6px) 
 <body>
 <div class="page">
 <!-- STAGE:BEGIN html (stage/apply_stage.py; edit stage/src/stage.html and rebuild) -->
-<!-- STAGE:STASH v1 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 -->
+<!-- STAGE:STASH v1 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 -->
   <section class="stagebar" id="stageBar" aria-label="Demo controls">
     <div class="controls" id="speeds"><span>Speed</span><button class="pill on" data-s="1">1×</button><button class="pill" data-s="3">3×</button><button class="pill" data-s="5">5×</button><button class="pill" data-s="10">10×</button></div>
     <div class="controls"><span>Chart</span><button class="pill on" id="degen">Degen mode</button></div>
@@ -3044,10 +3084,9 @@ function settle() {
     const upWon = endP > pos.target;
     pos.settled = true; pos.won = (pos.side === "up") === upWon; pos.endP = endP;
     if (pos.won) balance += pos.payout;
-    tradeLog.push(logEntry(pos.won ? "won" : "lost", pos.end, pos, pos.won ? pos.payout : 0));
     done.push(pos);
   }
-  if (done.length) { tfxSettled(done); emitChange(); } // market on screen -> neutral beat + result card; elsewhere -> toast
+  if (done.length) { tfxLogSettled(done); tfxSettled(done); emitChange(); } // Activity: one Won / Lost per side; market on screen -> neutral beat + result card; elsewhere -> toast
   for (const p of posts) {
     if (p.settled || simNow < p.end) continue;
     p.settled = true; p.won = (p.side === "up") === (priceAt(hist[p.asset], p.end) > p.target);
@@ -3546,6 +3585,7 @@ function renderSheet(m) {
   $("sMk").textContent = `${state.asset} · ${m.r.key}`;
   const b = $("buyBtn"), busy = b.classList.contains("busy") || b.classList.contains("ok"), box = $("amts");
   if (b.classList.contains("ok")) return; // done: hold the numbers the trade was made at (re-rendering now would price a second trade)
+  const sellSide = sell ? state.sellSide || cashSide(roundPositions(m)) : null; // step 21: a cash out sells one side; holding both, never the other one
   // when the numbers commit: on open, at once on a user change (amount or share chip), otherwise at most every ~0.5 s with the price
   const pick = (sell ? "s" : "b") + (sell ? state.sellFrac : state.amount), user = !snap && SG.pick !== pick; SG.pick = pick;
   const tick = snap || user || performance.now() - SG.numT >= 480; if (tick) SG.numT = performance.now();
@@ -3567,19 +3607,22 @@ function renderSheet(m) {
     box.querySelectorAll("button").forEach(x => x.classList.toggle("on", +x.dataset.a === state.amount));
     $("sPriceLbl").textContent = "Price";
     const d = m.now - m.target, ahead = d !== 0 && (d > 0) === up;
-    $("sNote").className = "sh-note" + (urg === "hot" ? " hot" : "");
-    $("sNote").innerHTML = urg === "hot" ? `Closes in ${mmss(m.rem)} — the price can still move fast.`
+    const held = roundPositions(m), opp = held.filter(p => p.side !== state.side); // step 21: you hold the other side, so this buy hedges it
+    $("sNote").className = "sh-note" + (urg === "hot" && !opp.length ? " hot" : "");
+    if (opp.length) { if (tick) { const w = roundIfs(m, { side: state.side, stake: state.amount, payout: pay }); // the round either way after this buy, at the cadence of the numbers above
+      const mine = held.length > opp.length ? "With both your sides" : `With your <b>${sideTxt(opp[0].side)} ${psUsd(sumBy(opp, p => p.stake))}</b>`;
+      $("sNote").innerHTML = `${mine}: if Up wins <b class="${netCls(w.up)}">${netTxt(w.up)}</b> · if Down wins <b class="${netCls(w.down)}">${netTxt(w.down)}</b>`; } }
+    else $("sNote").innerHTML = urg === "hot" ? `Closes in ${mmss(m.rem)} — the price can still move fast.`
       : `Now <b>${fmtPrice(state.asset, m.now)}</b> · ${fmtVsTarget(state.asset, d)} · ${up ? "Up" : "Down"} is ${ahead ? "ahead" : "behind"} right now`;
     b.classList.remove("cash"); b.classList.toggle("up", up); b.classList.toggle("down", !up); b.disabled = short || closed;
     if (!busy) { const why = closed ? "Round closed" : short ? "Not enough balance" : null; sgLabel(why || `${state.copyFrom ? "Copy" : "Buy"} ${up ? "▲ Up" : "▼ Down"}`, why ? null : "$" + state.amount, f, tick); }
   } else {
-    const ps = roundPositions(m); if (!ps.length) { if (!busy) closeSheets(); return; }
-    const fr = state.sellFrac, upPay = sumBy(ps.filter(p => p.side === "up"), p => p.payout), dnPay = sumBy(ps.filter(p => p.side === "down"), p => p.payout);
-    const main = upPay >= dnPay ? "up" : "down", val = sumBy(ps, p => cashValue(p, m)) * fr, cost = sumBy(ps, p => p.stake) * fr, pnl = val - cost, pays = (main === "up" ? upPay : dnPay) * fr;
-    const sc = Math.round(sumBy(ps, p => sellCents(p, m) * p.payout) / sumBy(ps, p => p.payout));
+    const all = roundPositions(m), side = sellSide, ps = all.filter(p => p.side === side); if (!ps.length) { if (!busy) closeSheets(); return; } // that side is gone: never switch sides under you
+    const fr = state.sellFrac, val = sumBy(ps, p => cashValue(p, m)) * fr, cost = sumBy(ps, p => p.stake) * fr, pnl = val - cost, pays = sumBy(ps, p => p.payout) * fr;
+    const sc = sellCents(ps[0], m), other = all.some(p => p.side !== side), nm = sideTxt(side), wins = side === "up" ? "Up" : "Down";
     sgTone("cash");
     $("sSide").className = "sh-side cash"; $("sSide").textContent = "Cash out";
-    $("sQ").innerHTML = `${sgNewTag()}Sell ${fr < .999 ? `${Math.round(fr * 100)}% of ` : ""}your <b>${main === "up" ? "▲ Up" : "▼ Down"}</b> position now at the current price. You paid <b>${money(cost)}</b>.`;
+    $("sQ").innerHTML = `${sgNewTag()}Sell ${fr < .999 ? `${Math.round(fr * 100)}% of ` : ""}your <b class="sg-sd ${side}">${nm}</b> position now at the current price. You paid <b>${money(cost)}</b>.${other ? ` Your ${sideTxt(side === "up" ? "down" : "up")} stays.` : ""}`;
     $("sWinLbl").textContent = "You get now"; $("sWin").classList.toggle("neg", pnl < 0); $("sWinWrap").classList.toggle("sg-neg", pnl < 0);
     if (tick) $("sWinWrap").classList.toggle("sg-long", val >= 999.995);
     N("win", "sWin", val, SGF.money); N("profit", "sProfit", pnl, SGF.signed); N("pct", "sPct", cost ? pnl / cost * 100 : 0, SGF.pct);
@@ -3591,7 +3634,10 @@ function renderSheet(m) {
     if (box.dataset.k !== "sell") { box.dataset.k = "sell"; box.style.gridTemplateColumns = "repeat(3, 1fr)"; box.innerHTML = [[.25, "25%"], [.5, "50%"], [1, "All"]].map(([v, t]) => `<button data-f="${v}">${t}</button>`).join(""); }
     box.querySelectorAll("button").forEach(x => x.classList.toggle("on", Math.abs(+x.dataset.f - fr) < .001));
     $("sPriceLbl").textContent = "Sell price";
-    $("sNote").className = "sh-note"; $("sNote").innerHTML = `Hold instead: <b>${money(pays)}</b> if ${main === "up" ? "Up" : "Down"} wins · $0 if not`;
+    $("sNote").className = "sh-note";
+    if (!other) $("sNote").innerHTML = `Hold instead: <b>${money(pays)}</b> if ${wins} wins · $0 if not`;
+    else if (tick) { const w = roundIfs(m, { side, payout: -pays, cash: val }); // holding both: what this sale leaves you either way
+      $("sNote").innerHTML = `After this sale: if Up wins <b class="${netCls(w.up)}">${netTxt(w.up)}</b> · if Down wins <b class="${netCls(w.down)}">${netTxt(w.down)}</b>`; }
     b.classList.remove("up", "down"); b.classList.add("cash"); b.disabled = m.end - simNow <= 0 || val < .005;
     if (!busy) sgLabel(val < .005 ? "No buyers at this price" : "Cash out", val < .005 ? null : money(val), f, tick);
   }
@@ -3604,6 +3650,7 @@ function confirmTrade() {
   balance -= state.amount; addTierPts(state.amount);
   let pos; positions.push(pos = { asset: state.asset, round: state.round, end: m.end, target: m.target, side: state.side, stake: state.amount, payout, settled: false,
     copiedFrom: state.copyFrom || undefined, t: simNow });
+  pos.stake0 = pos.stake; // step 21: what this buy put in (a partial cash out shrinks stake). Own line: step_calldetail.py matches the one above
   tradeLog.push(logEntry("buy", simNow, pos, -pos.stake));
   if (view === "market") tfxAddTick({ side: pos.side, stake: pos.stake });
   emitChange();
@@ -3688,7 +3735,8 @@ function showToast(title, body) {
 //  · urgency you can read: the round's countdown is a "Closes in" chip on the chart, top right (closes/apply_closes.py moves #tlBox there in a later
 //    build step). Each round tab shows its own countdown. The chip goes amber near the end and red + heartbeat in the last seconds (tfxTime colours #tlBox).
 //  · amounts on the page ($5 / $10 / $25 / $50, glass lens) so the buttons show what they pay before you tap; Up/Down → one tap Buy
-//  · a live position strip with Cash out (sell at the bid, 25 / 50 / All) once you hold a position in this round
+//  · a live position strip with Cash out (sell at the bid, 25 / 50 / All) once you hold a position in this round. Hold both Up and Down
+//    (step 21) and it shows one row per side, each with its own Winning / Losing and Cash out, and the round either way ("If ▲ Up wins …")
 //  · the result moment: a neutral "Checking final price…" beat, then a win reveal (count-up, confetti, balance rolls up) or a calm, plain loss card;
 //    "Next round" opens the ticket (it never buys for you); after 3 losses in a row it offers a break
 //  · a trades line that merges bursts (step 16), and opt-in live calls that land as pins on the line, never over it (chat button; off = a count badge)
@@ -3735,7 +3783,7 @@ function tfxReset() {
   tradeLog.length = 0;
   Object.assign(TFX, { extra: 0, trKey: "", holdBal: null, lossStreak: 0, lastBeat: null, stripKey: null, stripWin: null, callQ: [], callUnseen: 0, balShown: null });
   clearTimeout(TFX.revealT); tfxHideResult();
-  state.mode = "buy"; state.sellFrac = 1;
+  state.mode = "buy"; state.sellFrac = 1; state.sellSide = null;
   $("settling").classList.remove("show"); $("chartCard").classList.remove("settle", "win", "lose");
   $("ticker").innerHTML = ""; $("callFly").innerHTML = ""; tfxCallBadge();
 }
@@ -3749,6 +3797,31 @@ const roundPositions = m => positions.filter(p => !p.settled && p.asset === stat
 // buy at mid + 1¢ (market()), sell at mid − 1¢: a 2¢ spread, shown honestly as the Cash out price
 const sellCents = (p, m) => Math.max(0, Math.min(99, Math.round((p.side === "up" ? m.pUp : 1 - m.pUp) * 100) - 1)); // 0 = no bid left
 const cashValue = (p, m) => p.payout * sellCents(p, m) / 100;
+// ---- your book in one round (step 21). positions stay one lot per buy (the call sheet's "You" markers and Portfolio read them as they are);
+// what you see adds the lots up per side, one position per outcome. You can hold both sides: each one is shown, cashed out and settled on its own. ----
+const lotIn = p => p.stake0 ?? (p.sold ? (p.soldStake ?? p.stake) : p.stake + (p.soldStake || 0)); // what went into a lot (a partial cash out shrinks p.stake; stake0 = the buy)
+const roundLots = (a, r, end) => positions.filter(p => p.asset === a && p.round === r && p.end === end); // every lot of that round: open, sold, settled
+function sideBook(ps, m) { // the open lots of one round, per side: stake, payout (= shares), cash value at the bid
+  const B = {};
+  for (const s of ["up", "down"]) { const L = ps.filter(p => p.side === s); B[s] = { side: s, lots: L, n: L.length, stake: sumBy(L, p => p.stake), payout: sumBy(L, p => p.payout), val: sumBy(L, p => cashValue(p, m)) }; }
+  B.both = B.up.n > 0 && B.down.n > 0;
+  return B;
+}
+// the round either way: what you end it with if Up wins / if Down wins = cash-outs already taken + what that side's open lots pay − everything
+// put into the round. `add` prices a trade that isn't made yet: a buy { side, stake, payout }, a cash out { side, payout: −shares, cash }
+function roundIfs(m, add) {
+  const all = roundLots(state.asset, state.round, m.end), open = all.filter(p => !p.settled);
+  let inn = sumBy(all, lotIn), cash = sumBy(all, p => p.soldFor || 0), up = sumBy(open.filter(p => p.side === "up"), p => p.payout), dn = sumBy(open.filter(p => p.side === "down"), p => p.payout);
+  if (add) { inn += add.stake || 0; cash += add.cash || 0; if (add.side === "up") up += add.payout || 0; else dn += add.payout || 0; }
+  return { up: cash + up - inn, down: cash + dn - inn };
+}
+// the side a cash out sells: the one asked for if you hold it, else the bigger payout (the only side when you hold one)
+const cashSide = (ps, want) => ps.some(p => p.side === want) ? want : !ps.some(p => p.side === "down") ? "up" : !ps.some(p => p.side === "up") ? "down"
+  : sumBy(ps.filter(p => p.side === "up"), p => p.payout) >= sumBy(ps.filter(p => p.side === "down"), p => p.payout) ? "up" : "down";
+const sideTxt = s => s === "up" ? "▲ Up" : "▼ Down";
+const psUsd = v => "$" + (Math.abs(v - Math.round(v)) < .005 ? Math.round(v).toLocaleString("en-US") : v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+const netTxt = v => Math.abs(v) < .005 ? "$0.00" : (v > 0 ? "+" : "−") + money(Math.abs(v)); // a round's result: +$2.22 / −$2.46 / $0.00
+const netCls = v => Math.abs(v) < .005 ? "ps-even" : v > 0 ? "ps-gain" : "ps-loss"; // (not .pos: the feed's position card)
 const axisValue = v => { const d = Math.abs(v) >= 1000 ? 0 : ASSETS[state.asset].dec; return "$" + v.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); };
 
 // ---- glass lens for the amount chips (page + sheet): the shared GlassSeg component (glassseg/), the same liquid glass as every other
@@ -3778,33 +3851,55 @@ function tfxLens(box, animate) {
 }
 
 // ---- live position strip (replaces the amount chips while you hold a position in this round) ----
+// One side (one buy or several, added up): "▲ Up $40.00 → $83.33 · Winning now" + Cash out at the bid.
+// Both sides (step 21): a row per side, each with its own stake → payout, its own Winning / Losing (Up and Down can't both win) and its own Cash out
+// (it opens the sheet for that side only), then the round either way: "If ▲ Up wins −$2.46 · If ▼ Down wins +$2.22" (roundIfs: cash-outs
+// already taken + that side's payout − everything put in). The outcome the price points to right now is the brighter half of that line.
+const psCashHTML = (s, one) => `<button class="ps-cash"${one ? ' id="psCash"' : ""} data-side="${s}"><span>Cash out<i class="ps-sr"> ${s === "up" ? "Up" : "Down"}</i></span><b${one ? ' id="psVal"' : ""} data-side="${s}"></b></button>`;
+const psOneHTML = b => `<div class="ps-l"><div class="ps-r1"><span class="ps-side ${b.side}">${sideTxt(b.side)}</span>${money(b.stake)} <span class="ar">→</span> ${money(b.payout)}</div><div class="ps-st" id="psSt"></div></div>${psCashHTML(b.side, true)}`;
+const psRowHTML = b => `<div class="ps-row" data-side="${b.side}"><span class="ps-side ${b.side}">${sideTxt(b.side)}</span><span class="ps-mid"><span class="ps-amt">${psUsd(b.stake)} <span class="ar">→</span> ${moneyShort(b.payout)}</span><span class="ps-stt"></span></span>${psCashHTML(b.side)}</div>`;
+const psIfHTML = f => `<div class="ps-if"><span data-if="up">If <span aria-hidden="true">▲ </span>Up wins <b class="${netCls(f.up)}">${netTxt(f.up)}</b></span><i aria-hidden="true">·</i><span data-if="down">If <span aria-hidden="true">▼ </span>Down wins <b class="${netCls(f.down)}">${netTxt(f.down)}</b></span></div>`;
 function renderMine(m) {
   const ps = roundPositions(m), dock = $("dock"), strip = $("pStrip"), card = $("chartCard");
   const holding = ps.length > 0;
   dock.classList.toggle("holding", holding);
   if (!holding) { TFX.stripKey = null; TFX.stripWin = null; card.classList.remove("win", "lose"); return; }
-  const upPay = sumBy(ps.filter(p => p.side === "up"), p => p.payout), dnPay = sumBy(ps.filter(p => p.side === "down"), p => p.payout);
-  const main = upPay >= dnPay ? "up" : "down", mixed = upPay > 0 && dnPay > 0;
-  const stake = sumBy(ps, p => p.stake), val = sumBy(ps, p => cashValue(p, m)), pays = main === "up" ? upPay : dnPay;
-  const winning = (main === "up") === (m.now > m.target), rem = m.end - simNow;
-  const key = ps.map(p => p.t + p.side + p.stake.toFixed(4)).join("|");
+  const B = sideBook(ps, m), dual = B.both, one = B.up.n ? "up" : "down", rem = m.end - simNow, upNow = m.now > m.target;
+  const key = (dual ? "2" : "1") + ps.map(p => p.t + p.side + p.stake.toFixed(4)).join("|");
   if (TFX.stripKey !== key) {
     const fresh = TFX.stripKey === null;
-    const r1 = mixed
-      ? `<span class="ps-side up">▲ ${money(sumBy(ps.filter(p => p.side === "up"), p => p.stake))}</span><span class="ps-side down">▼ ${money(sumBy(ps.filter(p => p.side === "down"), p => p.stake))}</span>`
-      : `<span class="ps-side ${main}">${main === "up" ? "▲ Up" : "▼ Down"}</span>${money(stake)} <span class="ar">→</span> ${money(pays)}`;
-    strip.innerHTML = `<div class="ps-l"><div class="ps-r1">${r1}</div><div class="ps-st" id="psSt"></div></div><button class="ps-cash" id="psCash"><span>Cash out</span><b id="psVal"></b></button>`;
-    TFX.psVal = MA.label($("psVal"), { format: v => money(v), minInterval: 1000, timing: "snappy" }); TFX.psVal.snap(val);
+    if (fresh || TFX.stripKey[0] !== key[0]) TFX.stripWin = null; // one side <-> both sides is a new layout, not a flip
+    strip.classList.toggle("ps-dual", dual); strip.classList.remove("win", "lose");
+    strip.innerHTML = dual ? psRowHTML(B.up) + psRowHTML(B.down) + psIfHTML(roundIfs(m)) : psOneHTML(B[one]);
+    TFX.psV = {};
+    strip.querySelectorAll(".ps-cash b").forEach(b => { const s = b.dataset.side; TFX.psV[s] = MA.label(b, { format: v => money(v), minInterval: 1000, timing: "snappy" }); TFX.psV[s].snap(B[s].val); });
     TFX.stripKey = key; if (fresh) restartCls(strip, "pop");
   }
-  TFX.psVal.set(val);
-  const st = rem <= 0 ? "Round ended" : `${rem <= 10 ? "Final seconds · " : ""}${winning ? "Winning now" : "Losing now"}`;
-  const stEl = $("psSt"); if (stEl.textContent !== st) stEl.textContent = st;
-  strip.classList.toggle("win", winning); strip.classList.toggle("lose", !winning);
-  card.classList.toggle("win", winning); card.classList.toggle("lose", !winning);
-  $("psCash").disabled = rem <= 0 || val < .005;
-  if (TFX.stripWin !== null && TFX.stripWin !== winning) { restartCls(strip, "flash"); fx.flip(winning); }
-  TFX.stripWin = winning;
+  let mood; // the chart card's glow: would this round be a gain if it ended now?
+  if (!dual) {
+    const winning = (one === "up") === upNow;
+    TFX.psV[one].set(B[one].val);
+    const st = rem <= 0 ? "Round ended" : `${rem <= 10 ? "Final seconds · " : ""}${winning ? "Winning now" : "Losing now"}`;
+    const stEl = $("psSt"); if (stEl.textContent !== st) stEl.textContent = st;
+    strip.classList.toggle("win", winning); strip.classList.toggle("lose", !winning);
+    $("psCash").disabled = rem <= 0 || B[one].val < .005;
+    mood = winning ? "win" : "lose";
+  } else {
+    for (const s of ["up", "down"]) {
+      const row = strip.querySelector(`.ps-row[data-side="${s}"]`), winning = (s === "up") === upNow;
+      TFX.psV[s].set(B[s].val);
+      row.classList.toggle("win", winning); row.classList.toggle("lose", !winning);
+      const st = rem <= 0 ? "Ended" : winning ? "Winning" : "Losing", stEl = row.querySelector(".ps-stt"); if (stEl.textContent !== st) stEl.textContent = st;
+      row.querySelector(".ps-cash").disabled = rem <= 0 || B[s].val < .005;
+    }
+    strip.querySelectorAll(".ps-if > span").forEach(el => el.classList.toggle("now", (el.dataset.if === "up") === upNow));
+    const f = roundIfs(m), now = upNow ? f.up : f.down;
+    mood = now >= .005 ? "win" : now <= -.005 ? "lose" : "";
+  }
+  card.classList.toggle("win", mood === "win"); card.classList.toggle("lose", mood === "lose");
+  const flip = dual ? (upNow ? "u" : "d") : mood; // both sides: the outcome flipped (one row starts winning, the other losing)
+  if (TFX.stripWin !== null && TFX.stripWin !== flip) { restartCls(strip, "flash"); fx.flip(mood === "win"); }
+  TFX.stripWin = flip;
 }
 
 // ---- time: hero countdown colours + last-10-seconds heartbeat ----
@@ -3817,28 +3912,30 @@ function tfxTime(m) {
   }
 }
 
-// ---- cash out ----
-function openCashout() {
-  const m = market(state.asset, state.round); if (!roundPositions(m).length || m.end - simNow <= 0) return;
-  fx.tap(); state.mode = "sell"; state.sellFrac = 1; state.copyFrom = null;
+// ---- cash out: one side at a time (state.sellSide). Holding both, the other side is never touched ----
+function openCashout(side) {
+  const m = market(state.asset, state.round), ps = roundPositions(m); if (!ps.length || m.end - simNow <= 0) return;
+  fx.tap(); state.mode = "sell"; state.sellSide = cashSide(ps, side); state.sellFrac = 1; state.copyFrom = null;
   sheetOpen = true; $("form").style.display = ""; $("done").style.display = "none";
   $("scrim").classList.add("show"); $("tradeSheet").classList.add("show");
   sheetSnap = true; $("buyBtn").classList.remove("busy", "pressed", "ok"); $("buyBtn").removeAttribute("aria-label"); render(); sgOpen();
 }
 function confirmCashout() {
-  const m = market(state.asset, state.round), ps = roundPositions(m), f = state.sellFrac;
+  const m = market(state.asset, state.round), all = roundPositions(m), side = state.sellSide || cashSide(all), ps = all.filter(p => p.side === side), f = state.sellFrac; // never the side you didn't pick
   if (!ps.length || m.end - simNow <= 0) return null;
-  let got = 0, cost = 0;
-  for (const p of ps) {
-    const c = sellCents(p, m), shares = p.payout * f, proceeds = shares * c / 100, basis = p.stake * f;
-    got += proceeds; cost += basis;
-    tradeLog.push(logEntry("sell", simNow, { ...p, stake: basis, payout: shares, settled: true, won: false }, proceeds));
-    p.soldFor = (p.soldFor || 0) + proceeds; p.soldAt = simNow;
-    if (f >= .999) { p.sold = true; p.settled = true; p.won = false; } else { p.payout -= shares; p.stake -= basis; }
+  let got = 0, cost = 0, shares = 0;
+  for (const p of ps) { // every lot of that side sells the same share at the same bid
+    const c = sellCents(p, m), sh = p.payout * f, proceeds = sh * c / 100, basis = p.stake * f;
+    got += proceeds; cost += basis; shares += sh;
+    p.soldFor = (p.soldFor || 0) + proceeds; p.soldStake = (p.soldStake || 0) + basis; p.soldAt = simNow;
+    if (f >= .999) { p.sold = true; p.settled = true; p.won = false; } else { p.payout -= sh; p.stake -= basis; }
   }
+  const p0 = ps[0], from = [...new Set(ps.map(p => p.copiedFrom).filter(Boolean))];
+  tradeLog.push(logEntry("sell", simNow, { asset: p0.asset, round: p0.round, end: p0.end, target: p0.target, side, stake: cost, payout: shares, settled: true, won: false,
+    copiedFrom: from.length === 1 ? from[0] : undefined }, got)); // one Activity row per cash out, however many buys it sold
   balance += got; TFX.stripKey = null;
   emitChange();
-  return { label: `✓ Cashed out ${money(got)}`, got, cost, sell: true };
+  return { label: `✓ Cashed out ${sideTxt(side)} · ${money(got)}`, got, cost, sell: true, side };
 }
 
 // ---- buy success: the bet token flies from the Buy slab into the position strip (sgFly, below) ----
@@ -3849,8 +3946,9 @@ function tfxFly(from, r) {
     showToast(`✓ ${r.copy ? "Copied" : "Bought"} ${up ? "▲ Up" : "▼ Down"} · ${money(pos.stake)}`, `${pos.asset} ${pos.round} · pays ${money(pos.payout)} if ${pos.asset} ends ${up ? "above" : "at or below"} ${fmtPrice(pos.asset, pos.target)}`);
     return;
   }
-  if (!to.offsetParent || tfxReduced() || !from) { restartCls(to, "pop"); return; }
-  sgFly(from, to, `${up ? "▲" : "▼"} ${money(pos.stake)}`, up ? "up" : "down", 46, () => { restartCls(to, "pop"); sgShine(to); buzz(6); });
+  const row = to.querySelector(`.ps-row[data-side="${pos.side}"]`), at = row || to; // holding both sides: it lands on its own side's row
+  if (!to.offsetParent || tfxReduced() || !from) { restartCls(at, "pop"); return; }
+  sgFly(from, at, `${up ? "▲" : "▼"} ${money(pos.stake)}`, up ? "up" : "down", 46, () => { restartCls(at, "pop"); sgShine(at); buzz(6); });
 }
 
 // ---- trade sheet: liquid glass + feel (step 15, sheetglass). The look is CSS ("trade sheet (step 15)" in tradefx.css); this is its motion. ----
@@ -4132,22 +4230,51 @@ $("buyBtn").addEventListener("touchstart", () => {}, { passive: true }); // iOS 
 $("amts").addEventListener("pointerdown", sgChipDown);
 
 // ---- settlement: neutral beat, then the result card (market on screen) or a toast (anywhere else) ----
+// Activity: one Won / Lost row per side and round (settle() credits each lot; several buys on one side are one position)
+function tfxLogSettled(done) {
+  const groups = new Map();
+  for (const p of done) { const k = `${p.asset}|${p.round}|${p.end}|${p.side}`; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(p); }
+  for (const ps of groups.values()) {
+    const p0 = ps[0], from = [...new Set(ps.map(p => p.copiedFrom).filter(Boolean))], stake = sumBy(ps, p => p.stake), payout = sumBy(ps, p => p.payout);
+    tradeLog.push(logEntry(p0.won ? "won" : "lost", p0.end, { asset: p0.asset, round: p0.round, end: p0.end, target: p0.target, side: p0.side, stake, payout, settled: true, won: p0.won,
+      copiedFrom: from.length === 1 ? from[0] : undefined }, p0.won ? payout : 0));
+  }
+}
+// the whole round, per side (a leg): what went in, what came back (cash-outs + the payout now) and how it ended. Holding both sides, one leg wins
+// and the other loses; net = everything back − everything in, cash-outs included, so a hedge or a partial cash out never shows as a bigger win
+function tfxRoundResult(a, r, end, target, endP) {
+  const all = roundLots(a, r, end), upWon = endP > target, legs = [];
+  for (const s of ["up", "down"]) {
+    const L = all.filter(p => p.side === s); if (!L.length) continue;
+    const held = L.filter(p => !p.sold), won = (s === "up") === upWon, inn = sumBy(L, lotIn), cashed = sumBy(L, p => p.soldFor || 0), paid = won ? sumBy(held, p => p.payout) : 0;
+    legs.push({ side: s, inn, cashed, paid, out: cashed + paid, held: held.length > 0, won });
+  }
+  const stake = sumBy(legs, l => l.inn), paid = sumBy(legs, l => l.paid), cashed = sumBy(legs, l => l.cashed);
+  return { asset: a, round: r, end, target, endP, stake, paid, cashed, net: paid + cashed - stake, sides: legs.map(l => l.side), upWon, legs };
+}
 function tfxSettled(done) {
   const groups = new Map();
   for (const p of done) { const k = `${p.asset}|${p.round}|${p.end}`; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(p); }
   for (const ps of groups.values()) {
-    const p0 = ps[0], stake = sumBy(ps, p => p.stake), paid = sumBy(ps, p => p.won ? p.payout : 0), net = paid - stake;
-    TFX.lossStreak = net > 0 ? 0 : TFX.lossStreak + 1;
-    const g = { asset: p0.asset, round: p0.round, end: p0.end, target: p0.target, endP: p0.endP, stake, paid, net, sides: [...new Set(ps.map(p => p.side))],
-      upWon: p0.endP > p0.target, streak: TFX.lossStreak };
+    const p0 = ps[0], g = tfxRoundResult(p0.asset, p0.round, p0.end, p0.target, p0.endP);
+    TFX.lossStreak = g.net >= .005 ? 0 : g.net <= -.005 ? TFX.lossStreak + 1 : TFX.lossStreak; // break-even is neither
+    g.streak = TFX.lossStreak;
     if (view === "market" && g.asset === state.asset && g.round === state.round && !TFX.result) tfxBeginReveal(g);
     else tfxToast(g);
   }
 }
-const sidesTxt = g => g.sides.map(s => s === "up" ? "▲ Up" : "▼ Down").join(" + ");
+const sidesTxt = g => g.sides.map(sideTxt).join(" + ");
+const plainRound = g => !g.legs || (g.legs.length === 1 && g.legs[0].cashed < .005); // one side, no cash out: the simple copy
+const legTxt = l => `${sideTxt(l.side)} ${money(l.inn)} → ${money(l.out)}`;
 function tfxToast(g) {
-  showToast(g.paid > 0 ? `You won ${money(g.paid)}` : `Round ended · ${g.upWon ? "Up" : "Down"} won`,
-    `${g.asset} ${g.round} · ${sidesTxt(g)} ${money(g.stake)} · final ${fmtPrice(g.asset, g.endP)}`);
+  if (plainRound(g)) {
+    showToast(g.paid > 0 ? `You won ${money(g.paid)}` : `Round ended · ${g.upWon ? "Up" : "Down"} won`,
+      `${g.asset} ${g.round} · ${sidesTxt(g)} ${money(g.stake)} · final ${fmtPrice(g.asset, g.endP)}`);
+    return;
+  }
+  const n = g.net; // both sides or a cash out: the round's result, never just the side that paid
+  showToast(`${g.asset} ${g.round} · ${g.upWon ? "Up" : "Down"} won · ${Math.abs(n) < .005 ? "break-even" : netTxt(n)}`,
+    `${g.legs.map(legTxt).join(" · ")} · final ${fmtPrice(g.asset, g.endP)}`);
 }
 function tfxBeginReveal(g) {
   TFX.holdBal = balance - g.paid; // the balance on screen waits for the reveal
@@ -4157,21 +4284,25 @@ function tfxBeginReveal(g) {
 function tfxReveal(g) {
   $("settling").classList.remove("show"); $("chartCard").classList.remove("settle");
   if (view !== "market") { TFX.holdBal = null; tfxToast(g); return; }
-  const win = g.net > 0, el = $("result"), d = g.endP - g.target, r = ROUND[g.round];
+  const win = g.net >= .005, even = !win && g.net > -.005, tone = win ? "win" : even ? "even" : "lose", el = $("result"), d = g.endP - g.target, r = ROUND[g.round];
   const lbl = roundLabel({ r, start: g.end - r.secs, end: g.end });
-  el.className = "result " + (win ? "win" : "lose");
+  // one side, no cash out: the plain line. Both sides or a cash out (step 21): a line per side, in → back and how it ended; the big number is the round
+  const leg = l => `<div class="rs-leg ${!l.held ? "cash" : l.won ? "won" : "lost"}"><span class="ps-side ${l.side}">${sideTxt(l.side)}</span><span class="rs-io">${money(l.inn)} <span class="ar">→</span> <b>${money(l.out)}</b>${l.held && l.cashed >= .005 ? `<small>incl. ${money(l.cashed)} cashed out</small>` : ""}</span><span class="rs-res">${!l.held ? "Cashed out" : l.won ? "Won" : "Lost"}</span></div>`;
+  const body = plainRound(g) ? `<div class="rs-s">${win ? `You put in ${money(g.stake)} · paid <b>${money(g.paid)}</b>` : g.paid > 0 ? `Paid ${money(g.paid)} on ${money(g.stake)} in` : `Your ${sidesTxt(g)} ${money(g.stake)} didn’t make it`}</div>`
+    : `<div class="rs-legs">${g.legs.map(leg).join("")}</div>`;
+  el.className = "result " + tone;
   el.innerHTML = `<div class="rs-top"><span class="rs-badge ${g.upWon ? "up" : "down"}">${g.upWon ? "▲ Up" : "▼ Down"} won</span><span class="rs-mk">${g.asset} · ${g.round} · ${lbl}</span><button class="rs-x" id="rsX" aria-label="Close">✕</button></div>
-    <div class="rs-v ${win ? "win" : "lose"}" id="rsV">${win ? "+$0.00" : "−" + money(Math.abs(g.net))}</div>
-    <div class="rs-s">${win ? `You put in ${money(g.stake)} · paid <b>${money(g.paid)}</b>` : g.paid > 0 ? `Paid ${money(g.paid)} on ${money(g.stake)} in` : `Your ${sidesTxt(g)} ${money(g.stake)} didn’t make it`}</div>
+    <div class="rs-v ${tone}" id="rsV">${win ? "+$0.00" : even ? "$0.00" : "−" + money(Math.abs(g.net))}</div>${even ? `<div class="rs-even">Break-even: you got back what you put in</div>` : ""}
+    ${body}
     <div class="rs-f">Final ${fmtPrice(g.asset, g.endP)} · ${fmtVsTarget(g.asset, d)} the price to beat</div>
-    ${!win && g.streak >= 3 ? `<div class="rs-br">${g.streak} losses in a row. Take a short break?<button id="rsBreak">Take a break</button></div>` : ""}
+    ${tone === "lose" && g.streak >= 3 ? `<div class="rs-br">${g.streak} losses in a row. Take a short break?<button id="rsBreak">Take a break</button></div>` : ""}
     <div class="rs-next"><span class="nl">Next round · <b id="rsCd"></b></span><button class="rs-b up" data-side="up">▲ Up</button><button class="rs-b down" data-side="down">▼ Down</button></div>`;
   TFX.result = g; tfxResultTick(market(state.asset, state.round));
   requestAnimationFrame(() => el.classList.add("show"));
   if (win) {
     setTimeout(() => tfxCountUp($("rsV"), g.net, 900, () => { TFX.holdBal = null; render(); restartCls($("bal"), "up"); setTimeout(() => $("bal").classList.remove("up"), 1600); }), 180);
     setTimeout(() => tfxConfetti(el), 160); fx.win();
-  } else { TFX.holdBal = null; fx.lose(); }
+  } else { TFX.holdBal = null; if (!even) fx.lose(); } // break-even: no fanfare, no sad tone
   clearTimeout(TFX.resultTimer); TFX.resultTimer = setTimeout(tfxHideResult, 12000);
 }
 function tfxResultTick(m) { const e = $("rsCd"); if (e) { const t = tabTime(m.rem); if (e.textContent !== t) e.textContent = t; } }
@@ -4618,7 +4749,7 @@ $("amtRow").addEventListener("click", e => {
   state.amount = +b.dataset.a; fx.tap(); render(); tfxLens($("amtRow"), true);
   restartCls($("btnUp"), "bump"); restartCls($("btnDown"), "bump");
 });
-$("pStrip").addEventListener("click", e => { if (e.target.closest("#psCash")) openCashout(); });
+$("pStrip").addEventListener("click", e => { const b = e.target.closest(".ps-cash"); if (b && !b.disabled) openCashout(b.dataset.side); }); // each side's own Cash out
 $("btnUp").addEventListener("click", () => fx.tap()); $("btnDown").addEventListener("click", () => fx.tap());
 $("result").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
@@ -5841,12 +5972,17 @@ setInterval(() => {
     var f = Object.create(api);
     f.getPositions = function () {
       scan();
-      return positionsRaw().map(function (p, i) {
+      var out = [], open = {};
+      positionsRaw().forEach(function (p, i) {
         var o = Object.assign({}, p);
         if (o.id == null) o.id = "pf" + st.epoch + "_" + i;
         if (o.boughtAt == null && st.buyT[i] != null) o.boughtAt = st.buyT[i];
-        return o;
+        var k = o.settled ? null : o.asset + "|" + o.round + "|" + o.end + "|" + o.side, g = k && open[k]; // step 21 (tradefx): one open row per side and round
+        if (g) { g.stake = (+g.stake || 0) + (+o.stake || 0); g.payout = (+g.payout || 0) + (+o.payout || 0); g.lots++; return; }
+        if (k) { o.lots = 1; open[k] = o; }
+        out.push(o);
       });
+      return out;
     };
     f.onChange = function (cb) {
       var sig = null, vis = false;
