@@ -361,9 +361,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .cd-mkt .mid b .side { font-size: 12px; font-weight: 750; padding: 1px 7px; border-radius: 6px; }
 .cd-mkt .mid b .side.up { color: var(--green); background: rgba(0,191,99,.15); } .cd-mkt .mid b .side.dn { color: #ff5c7a; background: rgba(224,38,83,.15); }
 .cd-mkt .mid > span { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cd-mkt .go { flex: none; display: inline-flex; align-items: center; gap: 3px; font-size: 13px; font-weight: 700; color: var(--text); padding: 6px 10px 6px 12px; border-radius: 999px;
-  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-top-color: rgba(255,255,255,.22); }
-.cd-mkt:active .go { background: rgba(255,255,255,.12); }
+/* the row still opens the market (a disclosure chevron says so); the button for it is the glass "Market" next to Copy in the footer (step 23) */
+.cd-mkt .chev { flex: none; display: grid; place-items: center; width: 22px; height: 38px; margin-right: -3px; color: var(--dim); transition: color .15s, transform .15s; }
+.cd-mkt:active .chev { color: var(--text); transform: translateX(2px); }
+@media (hover: hover) { .cd-mkt:hover .chev { color: var(--muted); } }
 .cd-hero { display: flex; align-items: flex-end; padding: 12px 12px 0; }
 .cd-hero .pm-val { font-size: 20px; line-height: 24px; }
 .cd-hero .pm-beat { margin-top: 3px; }
@@ -416,11 +417,57 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .cd-pos .pl .v { font-size: 17px; }
 .cd-pill { display: inline-block; font-size: 12px; font-weight: 700; border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
 .cd-pill.up { color: var(--green); background: rgba(0,191,99,.15); } .cd-pill.dn { color: #ff5c7a; background: rgba(224,38,83,.15); }
-.cd-foot { flex: none; padding: 10px 14px 28px; }
-.cd-foot .buybtn { margin-top: 0; }
+/* Sticky footer (step 23): the market + Copy on one row, in the thumb zone. Copy stays the coloured primary and takes the room it needs;
+   the market is the secondary in clear liquid glass (the Portfolio's Withdraw next to Deposit, GlassSeg's lens material) with the asset's logo,
+   the same height, so it is found at a glance without competing. Once the round has ended there is nothing to copy: the market button takes
+   the row and opens the live round ("Open the live BTC 15m round", with its time window). */
+.cd-foot { flex: none; display: flex; gap: 8px; padding: 10px 14px 28px; }
+.cd-foot .buybtn { margin-top: 0; flex: 1; min-width: 0; }
+.cd-go { position: relative; isolation: isolate; overflow: hidden; flex: none; min-width: 0; height: 58px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 0 13px 0 12px; border-radius: 19px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.35); -webkit-tap-highlight-color: transparent;
+  background:
+    radial-gradient(85% 75% at 22% -10%, rgba(255,255,255,.16), rgba(255,255,255,0) 62%),
+    radial-gradient(60% 50% at 80% 120%, rgba(255,255,255,.045), rgba(255,255,255,0) 70%),
+    linear-gradient(180deg, rgba(255,255,255,.19) 0%, rgba(255,255,255,.07) 52%, rgba(255,255,255,.1) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.34), inset 1px 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,255,255,.1), inset -1px -1px 0 rgba(255,255,255,.05),
+    inset 0 -5px 10px rgba(0,0,0,.16), 0 6px 16px -4px rgba(0,0,0,.42), 0 2px 5px rgba(0,0,0,.26);
+  -webkit-backdrop-filter: blur(10px) saturate(190%) brightness(1.2); backdrop-filter: blur(10px) saturate(190%) brightness(1.2);
+  transition: transform .12s cubic-bezier(.3,.7,.4,1); }
+.cd-go .coin { width: 26px; height: 26px; border-radius: 8px; font-size: 14px; /* step 19 logos round the crypto ones; its hairline ring is kept, + a drop shadow */
+  box-shadow: inset 0 0 0 .5px rgba(255,255,255,.16), inset 0 1px 0 rgba(255,255,255,.07), 0 1px 3px rgba(0,0,0,.35); }
+.cd-go-t { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; text-align: left; }
+.cd-go-t b { max-width: 100%; font-size: 16px; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cd-go-t small { max-width: 100%; margin-top: 2px; font-size: 12px; font-weight: 600; line-height: 1.2; color: rgba(242,243,247,.68); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cd-go-t small:empty { display: none; }
+.cd-go-chev { flex: none; margin-left: -3px; opacity: .72; }
+/* press: a hair smaller + the glass lights up; one glint crosses it when the sheet has landed, so the eye finds it once */
+.cd-go::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; background: rgba(255,255,255,.12); opacity: 0; transition: opacity .18s; }
+.cd-go:active { transform: scale(.97); }
+.cd-go:active::before { opacity: 1; transition-duration: .06s; }
+@media (hover: hover) { .cd-go:hover::before { opacity: .55; } }
+.cd-go:focus-visible { outline: 2px solid rgba(255,255,255,.7); outline-offset: 2px; }
+.cd-go::after { content: ""; position: absolute; top: -40%; bottom: -40%; left: 0; width: 46%; z-index: -1; pointer-events: none; opacity: 0; transform: translateX(-130%) skewX(-18deg);
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.07) 28%, rgba(255,255,255,.2) 50%, rgba(255,255,255,.07) 72%, rgba(255,255,255,0)); }
+.cd-go.glint::after { animation: cdGoGlint .75s cubic-bezier(.25,.6,.3,1) both; }
+@keyframes cdGoGlint { 0% { opacity: 0; transform: translateX(-130%) skewX(-18deg); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateX(330%) skewX(-18deg); } }
+.cd-foot.ended #cdCopy { display: none; }
+.cd-foot.ended .cd-go { flex: 1; gap: 10px; }
+.cd-foot.ended .cd-go .coin { width: 30px; height: 30px; font-size: 16px; }
+.cd-foot.ended .cd-go-t small:not(:empty) { display: inline-flex; align-items: center; gap: 6px; }
+.cd-foot.ended .cd-go-t small::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: tfxLive 1.8s infinite; } /* live, like "N trading this round" */
+/* narrow phones (iPhone SE 1st gen, 320 px): both labels still fit on one row */
+@media (max-width: 359px) {
+  .cd-foot { gap: 6px; padding-left: 12px; padding-right: 12px; }
+  .cd-go { gap: 6px; padding: 0 10px; }
+  .cd-go-t b { font-size: 15px; }
+  .cd-foot .buybtn { font-size: 15.5px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .cd-rc.beat { animation: none; }
   .cd-rc-ring .fg { transition: none; }
+  .cd-go, .cd-mkt .chev { transition: none; }
+  .cd-go:active, .cd-mkt:active .chev { transform: none; }
+  .cd-go.glint::after, .cd-foot.ended .cd-go-t small::before { animation: none; }
 }
 @media (max-width: 760px) {
   .cd { height: calc(100% - max(14px, env(safe-area-inset-top)) - 6px); }
@@ -520,6 +567,12 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .cats.gseg button, .cats.gseg button.on { border-color: transparent; background: transparent; }
 .cats.gseg button .ic { transition: transform .38s cubic-bezier(.3,1.5,.5,1), filter .28s; }
 .cats.gseg button.on .ic { transform: translateY(-1px) scale(1.08); filter: drop-shadow(0 0 6px rgba(255,255,255,.3)); }
+/* the chips' only colour (step 22) is the star's own: with Watchlist selected its star turns the app's starred gold (--yellow) and fills, like
+   the starred stars in the list below it. Every other icon and label stays white / muted on the same neutral glass as every other control */
+.cats.gseg button[data-c="watch"] .ic { transition: transform .38s cubic-bezier(.3,1.5,.5,1), filter .28s, color .28s ease; }
+.cats.gseg button[data-c="watch"] .ic svg { fill: rgba(255,196,0,0); transition: fill .28s ease; }
+.cats.gseg button[data-c="watch"].on .ic { color: var(--yellow, #ffc400); filter: drop-shadow(0 0 6px rgba(255,196,0,.35)); }
+.cats.gseg button[data-c="watch"].on .ic svg { fill: var(--yellow, #ffc400); }
 /* round tabs: the solid white "on" fill becomes glass */
 .seg.gseg button.on { background: transparent; color: #fff; }
 .seg.gseg button.on .prog { background: rgba(255,255,255,.18); }
@@ -558,7 +611,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .gs-speeds > .pill, .gs-speeds > .pill.on { border-color: transparent; background: transparent; padding: 5px 12px; }
 .gs-speeds > .pill.on { color: #fff; }
 
-/* ---- tinted lens (opt-in: GlassSeg.attach(el, { tint }); used by Home's category chips and the market picker) ----
+/* ---- tinted lens (opt-in: GlassSeg.attach(el, { tint }); no control passes tint since step 22, which made the category chips neutral glass) ----
    The lens stays glass (frost, specular top edge, sheen, glint, refraction) and takes on the selected option's colour: a film inside the glass,
    a coloured rim over the glass border with light gathering at the bottom rim, and a soft coloured glow under it. Each colour's layers exist
    once per control and only cross-fade by opacity, so the colour morphs on the compositor while the lens travels. --gs-tint is the colour. */
@@ -602,7 +655,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .gl-ghost { position: absolute !important; margin: 0 !important; pointer-events: none !important; overflow: hidden !important; z-index: 2; }
 .gl-ghost, .gl-ghost * { animation: none !important; transition: none !important; }
 @media (prefers-reduced-motion: reduce) {
-  .gseg > button, .gseg button .ic, .gl-lens, .gl-body, .gl-sheen, .gs-edges { transition: none !important; }
+  .gseg > button, .gseg button .ic, .cats.gseg button .ic svg, .gl-lens, .gl-body, .gl-sheen, .gs-edges { transition: none !important; }
   .gseg > button:active, .gseg.gs-lift .gl-body, .gseg.gs-lift .gs-edges { transform: none; }
 }
 /* GLASSSEG:END css */
@@ -1812,7 +1865,7 @@ html.sg-lens #tradeSheet > .sg-edge { backdrop-filter: url(#sgLens) blur(1.6px) 
             <button class="cd-mkt" id="cdMkt" aria-label="Open this market">
               <span class="ci"><span class="coin" id="cdCoin"></span><i id="cdRound"></i></span>
               <span class="mid"><b id="cdTitle"></b><span id="cdEnds"></span></span>
-              <span class="go">Market<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+              <span class="chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
             </button>
             <div class="cd-hero">
               <div class="pm-tp"><span class="pm-lbl">Price To Beat</span><span class="pm-val pm-beat" id="cdPtb"></span></div>
@@ -1831,7 +1884,11 @@ html.sg-lens #tradeSheet > .sg-edge { backdrop-filter: url(#sgLens) blur(1.6px) 
             <div class="pl"><span class="k" id="cdPLbl">Profit</span><span class="v"><span id="cdPnl"></span><span class="cd-pill" id="cdPct"></span></span></div>
           </div>
         </div>
-        <div class="cd-foot"><button class="buybtn down" id="cdCopy"><span class="bl" id="cdCopyLbl">Copy ▼ Down · $10</span></button></div>
+        <!-- step 23: the market sits next to Copy (glass = secondary, Copy stays the coloured primary); after the round ends it is the only button and opens the live round -->
+        <div class="cd-foot" id="cdFoot">
+          <button class="cd-go" id="cdGo" aria-label="Open this market"><span class="coin" id="cdGoCoin" aria-hidden="true"></span><span class="cd-go-t"><b id="cdGoLbl">Market</b><small id="cdGoSub"></small></span><svg class="cd-go-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+          <button class="buybtn down" id="cdCopy"><span class="bl" id="cdCopyLbl">Copy ▼ Down · $10</span></button>
+        </div>
       </div>
       <!-- CALLDETAIL:HTML:END -->
       <div class="toast" id="toast"></div>
@@ -2825,22 +2882,19 @@ react/cjs/react-jsx-runtime.production.min.js:
     return t;
   }
 
-  // One colour per market category, the same on Home's chips and in the market picker, so a category always reads as its colour.
-  // Watchlist gold (the star; starred stars are gold), Trending amber-orange (the flame), Stocks blue (finance), Crypto purple, Pre-IPO sky
-  // cyan (the rocket). None of them reads as the Up green or the Down red. The lens becomes tinted glass in the selected category's colour;
-  // strength evens out how strongly each colour fills the glass (warm colours read weaker through it over the dark, bluish UI).
-  const CAT_TINT = {
-    watch: { color: "#ffcf40", strength: .85 }, trend: { color: "#ff8f33", strength: .95 },
-    stock: { color: "#4f9bff", strength: .7 }, crypto: { color: "#b986ff", strength: .85 }, ipo: { color: "#3fd3f5", strength: .65 },
-  };
+  // Category chips (Home #cats, market picker #acats): one neutral glass, no per-category tint (step 22). In updown colour means something:
+  // green Up, red Down, amber time, gold = starred. Categories are navigation, so they get the same clear glass as every other control (as in
+  // updown's own app) and the coin logos below bring the colour. A tinted palette ran out of hues: next to green, red and amber, five
+  // categories left purple as the only free slot for Crypto (Bitcoin orange = Trending's orange, indigo = Stocks' blue). The one accent is the
+  // star's own gold on the selected Watchlist chip (glassseg.css). GlassSeg's opts.tint stays available; glassseg.reg.js.pre_cat2 has the palette.
 
   // Home category chips: the market list cross-fades in chip order. "All markets ›" clears the selection: the lens fades out, the list cross-fades.
-  const cats = G.attach("cats", { list: "#mlist", tint: CAT_TINT }), allm = byId("allm");
+  const cats = G.attach("cats", { list: "#mlist" }), allm = byId("allm");
   if (cats && allm) allm.addEventListener("click", () => { if (cats.key != null) G.prepare(cats, { dir: 0 }); }, true);
   // market round tabs (each tab carries its own countdown; only the selection moves)
   G.attach("seg");
   // market picker chips (Watchlist if anything is starred / Crypto / Stocks / Pre-IPO): the market list cross-fades in chip order
-  G.attach("acats", { list: "#alist", tint: CAT_TINT });
+  G.attach("acats", { list: "#alist" });
   // amount chips on the market page (#amtRow) and in the trade sheet (#amts: $5-$50, or 25% / 50% / All in Cash-out mode) attach themselves:
   // tradefx's tfxLens(box, animate) calls GlassSeg.attach(box) + GlassSeg.sync(box, animate)
 
@@ -4589,7 +4643,8 @@ tfxTickerLoop(); tfxCallLoop();
 // ==== CALLDETAIL:JS:BEGIN — call detail sheet (step_calldetail.py; built by parts/make_calldetail_js.py) ====
 // Tap a Calls post (body or position card) -> glass bottom sheet: caller + Follow + their take, the market (tap -> market page) with the market page's
 // Price To Beat / Current Price row, a canvas chart of exactly that round (start -> end) with the market page's "Closes in" chip at its right end, drawn at 60 fps with trader markers
-// (green ring = Up, red = Down; overlapping markers cluster into a "3 ●●●" pill, tap it to fan the avatars out), the caller's position, a sticky one-tap Copy.
+// (green ring = Up, red = Down; overlapping markers cluster into a "3 ●●●" pill, tap it to fan the avatars out), the caller's position, and a sticky footer:
+// the glass "Market" button next to the one-tap Copy (step 23; after the round has ended it is the only button and opens the live round).
 // Trades are SIMULATED: seeded per round (same markers every time you reopen) plus a new live trade every 2-4.5 s.
 const CD = { open: false, p: null, range: "round", expanded: null, hits: [], intro: 0, raf: 0, last: 0, disp: null, yLo: null, yHi: null,
   extra: 0, liveTimer: 0, tipTimer: 0, alert: false, poster: null, mine: new Map(), tagShown: false };
@@ -4670,6 +4725,7 @@ function cdFill() {
   $("cdAv").setAttribute("style", avStyle(u)); $("cdAv").textContent = u.initials;
   $("cdName").innerHTML = `<b>${u.name}</b>${u.x ? `<span class="xl">${xLogo}</span>` : ""}`;
   $("cdCoin").textContent = a.glyph; $("cdCoin").style.background = a.color; $("cdRound").textContent = p.round;
+  const gc = $("cdGoCoin"); gc.textContent = a.glyph; gc.style.background = a.color; gc.setAttribute("data-al", p.asset); // footer Market button; step 19 paints [data-al] logos
   $("cdTitle").innerHTML = `${p.asset} · ${p.round}<span class="side ${up ? "up" : "dn"}">${up ? "▲ Up" : "▼ Down"}</span>`;
   $("cdEnds").textContent = `Up or Down · ${roundLabel({ r, start: p.end - r.secs, end: p.end })}`;
   $("cdText").textContent = p.text;
@@ -4707,7 +4763,19 @@ function renderCall(snap) {
   $("cdSub").innerHTML = `Called <span class="${up ? "u" : "d"}">${up ? "▲ Up" : "▼ Down"}</span> · ${ago(simNow - p.t)}`;
   const b = $("cdCopy"); b.classList.toggle("up", up); b.classList.toggle("down", !up);
   $("cdCopyLbl").textContent = ended ? `Trade the next ${p.asset} ${p.round} round` : `Copy ${up ? "▲ Up" : "▼ Down"} · $${state.amount}`;
+  cdSyncGo(ended);
   cdSyncMine();
+}
+// Step 23: the footer's glass Market button. While the round runs it is "Market" (+ the logo) next to Copy. Once the call's round has ended
+// there is nothing to copy (Copy hides, CSS .ended): it takes the row and says where it goes, "Open the live BTC 15m round" + that round's window.
+function cdSyncGo(ended) {
+  const p = CD.p, go = $("cdGo"), foot = $("cdFoot");
+  if (foot.classList.contains("ended") !== ended) foot.classList.toggle("ended", ended);
+  let lbl = "Market", sub = "", al = `${cdOnMarket() ? "Back to" : "Open"} the ${p.asset} ${p.round} market`;
+  if (ended) { const m = market(p.asset, p.round); lbl = `Open the live ${p.asset} ${p.round} round`; sub = `Live now · ${roundLabel(m)}`; al = `${lbl}, ${roundLabel(m)}`; }
+  if ($("cdGoLbl").textContent !== lbl) $("cdGoLbl").textContent = lbl;
+  if ($("cdGoSub").textContent !== sub) $("cdGoSub").textContent = sub;
+  if (go.getAttribute("aria-label") !== al) go.setAttribute("aria-label", al);
 }
 
 // ---- open / close ----
@@ -4722,6 +4790,7 @@ function openCall(p) {
   CD.intro = performance.now() + 140; // the line starts drawing while the sheet is still landing
   if (!CD.raf) CD.raf = requestAnimationFrame(cdFrame);
   cdLiveLoop();
+  clearTimeout(CD.glintT); CD.glintT = setTimeout(() => { if (CD.open) restartCls($("cdGo"), "glint"); }, 560); // step 23: one glint across the Market button once the sheet has landed
 }
 function closeCall() {
   if (!CD.open) return;
@@ -4993,8 +5062,18 @@ cdCv.addEventListener("click", e => { const b = cdCv.getBoundingClientRect(); cd
 
 // ---- sheet controls ----
 $("cdScrim").addEventListener("click", closeCall);
-$("cdMkt").addEventListener("click", () => { const p = CD.p; closeCall(); openMarket(p.asset, p.round); });
-$("cdCopy").addEventListener("click", () => { const p = CD.p; if (simNow >= p.end) { closeCall(); openMarket(p.asset, p.round); return; } openTradeSheet({ asset: p.asset, round: p.round, side: p.side, from: p.user.name }); });
+// Step 23: the market, from the footer's glass Market button or the card's market row. openMarket() shows the market's live round
+// (after the call's round has ended that is the next one, and the button says so). Opened from a pin on that very market's chart, the market
+// is right under the sheet: closing the sheet gets there, with no reload flash.
+function cdOnMarket() { return !!CD.p && view === "market" && state.asset === CD.p.asset && state.round === CD.p.round; }
+function cdGoMarket() {
+  const p = CD.p; if (!p) return;
+  const here = cdOnMarket(); closeCall();
+  if (!here) openMarket(p.asset, p.round);
+}
+$("cdMkt").addEventListener("click", cdGoMarket);
+$("cdGo").addEventListener("click", cdGoMarket);
+$("cdCopy").addEventListener("click", () => { const p = CD.p; if (simNow >= p.end) { cdGoMarket(); return; } openTradeSheet({ asset: p.asset, round: p.round, side: p.side, from: p.user.name }); });
 function cdToggleFollow() {
   const u = CD.p.user; u.follow = !u.follow;
   posts.forEach(q => { if (q.user === u && q.el) q.el.classList.toggle("isfol", u.follow); });
