@@ -1066,6 +1066,62 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   #vMarket .tb.ot-done .ot-chk path { stroke-dashoffset: 0; }
   .otap:active { transform: none; }
 }
+/* step 29 · One tap Cash out (tradefx.js "One tap Cash out"): with One tap on, a Cash out sells at once the share picked in the strip. The picker
+   (#otcFrac: 25% / 50% / All, a groove with the chips' clear glass lens) sits at the strip's bottom left, away from the Cash out buttons, so a slip
+   on it never sells; it shows only while One tap is on and you hold. One side: the position over the picker, Cash out on the right at full height.
+   Both sides: the two rows, then the picker beside the round either way (a line per outcome). As neutral as the strip (step 26): no green / red. */
+.otcf { display: none; }
+.dock.holding.ot-on .pstrip:not(.ps-dual) { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "l c" "f c"; column-gap: 10px; row-gap: 6px;
+  align-items: center; height: auto; padding: 6px 6px 6px 12px; }
+.dock.ot-on .pstrip > .ps-l { grid-area: l; }
+.dock.ot-on .pstrip:not(.ps-dual) > .ps-cash { grid-area: c; align-self: stretch; height: auto; min-height: 46px; }
+.dock.holding.ot-on .pstrip.ps-dual { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "u u" "d d" "f i"; column-gap: 8px; row-gap: 3px; }
+.dock.ot-on .ps-dual > .ps-row[data-side="up"] { grid-area: u; }
+.dock.ot-on .ps-dual > .ps-row[data-side="down"] { grid-area: d; }
+.dock.ot-on .ps-dual > .ps-if { grid-area: i; flex-direction: column; flex-wrap: nowrap; align-items: flex-end; justify-content: center; padding: 2px 6px 1px 0; line-height: 1.3; }
+.dock.ot-on .ps-dual > .ps-if > i { display: none; }
+.dock.holding.ot-on .pstrip > .otcf { grid-area: f; position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 3px; border-radius: 999px; isolation: isolate;
+  justify-self: start; background: rgba(0,0,0,.28); box-shadow: inset 0 1px 3px rgba(0,0,0,.45), inset 0 -1px 0 rgba(255,255,255,.04); }
+.dock.ot-on .ps-dual > .otcf { align-self: center; margin: 3px 0 3px 2px; }
+.otcf button { position: relative; z-index: 1; height: 26px; min-width: 44px; padding: 0 9px; border-radius: 999px; font-size: 12.5px; font-weight: 700; color: rgba(242,243,247,.6);
+  font-variant-numeric: tabular-nums; white-space: nowrap; touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: color .25s, transform .12s; }
+.otcf button.on { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+.otcf button:active { transform: scale(.95); }
+.otcf button:focus-visible { outline: 2px solid rgba(255,255,255,.55); outline-offset: 1px; }
+/* the button says what a tap does: "⚡ Cash out 50%" over the value of that share (One tap off: exactly as before). A sale: it presses in with a dark
+   ripple, then "✓ Sold $4.81" (dark check, the button's own ink) while a white ring rings out (.ot-wave.cash) and a glint crosses it */
+.ps-cash .pc-b, .ps-cash .pc-f, .ps-cash .pc-fx, .ps-cash .pc-ok { display: none; }
+.dock.ot-on .ps-cash { position: relative; isolation: isolate; touch-action: manipulation; -webkit-tap-highlight-color: transparent; } /* a double tap is one sale, never a zoom */
+.dock.ot-on .ps-cash > span { opacity: .72; white-space: nowrap; }
+.dock.ot-on .ps-cash .pc-b { display: inline-block; width: 10px; height: 10px; margin-right: 3px; vertical-align: -1px; fill: currentColor; }
+.dock.ot-on .ps-cash .pc-f { display: inline; font-style: normal; }
+.dock.ot-on .ps-cash .pc-fx { display: block; position: absolute; inset: 0; z-index: -1; border-radius: inherit; overflow: hidden; pointer-events: none; }
+.dock.ot-on .ps-cash > span, .dock.ot-on .ps-cash > b { transition: opacity .16s, transform .24s cubic-bezier(.2,.9,.3,1); }
+.dock.ot-on .ps-cash.pc-done > span, .dock.ot-on .ps-cash.pc-done > b { opacity: 0; transform: translateY(-10px); }
+.dock.ot-on .ps-cash.pc-now > span, .dock.ot-on .ps-cash.pc-now > b { transition: none; } /* a rebuilt button (partial sale) goes straight to ✓: its new value never flashes */
+.dock.ot-on .ps-cash .pc-ok { display: flex; position: absolute; inset: 0; flex-direction: column; align-items: center; justify-content: center; gap: 1px; line-height: 1.15; white-space: nowrap;
+  font-style: normal; pointer-events: none; opacity: 0; visibility: hidden; transform: translateY(10px); transition: opacity .14s, transform .2s, visibility 0s linear .2s; }
+.dock.ot-on .ps-cash.pc-done .pc-ok { opacity: 1; visibility: visible; transform: none; transition: opacity .18s ease-out .04s, transform .44s cubic-bezier(.2,1.4,.4,1) .04s, visibility 0s; }
+.pc-okl { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 750; }
+.pc-okv { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.ps-row .pc-okl { font-size: 10px; } .ps-row .pc-okv { font-size: 14.5px; }
+.pc-chk { width: 14px; height: 14px; flex: none; border-radius: 50%; display: grid; place-items: center; background: #0b0b11; color: #fff; }
+.ps-cash.pc-done .pc-chk { animation: otChk .52s cubic-bezier(.2,1.6,.4,1) both; }
+.pc-chk path { stroke-dasharray: 22; stroke-dashoffset: 22; }
+.ps-cash.pc-done .pc-chk path { animation: otDraw .3s cubic-bezier(.3,.7,.3,1) .14s forwards; }
+.pc-rip, .pc-gl { position: absolute; pointer-events: none; }
+.pc-rip { border-radius: 50%; will-change: transform, opacity;
+  background: radial-gradient(circle, rgba(11,11,17,.2) 0%, rgba(11,11,17,.1) 42%, rgba(11,11,17,.26) 60%, rgba(11,11,17,.07) 65%, rgba(11,11,17,0) 70%); }
+.pc-gl { top: -30%; bottom: -30%; left: 0; width: 42%; transform: translateX(-130%) skewX(-18deg);
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.75) 50%, rgba(255,255,255,0)); }
+.ot-wave.cash { --ot-rgb: 255,255,255; }
+.ps-cash.pc-bump > b { animation: tfxBump .32s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .dock.ot-on .ps-cash > span, .dock.ot-on .ps-cash > b, .dock.ot-on .ps-cash .pc-ok, .dock.ot-on .ps-cash.pc-done .pc-ok, .otcf button { transition: none !important; }
+  .ps-cash.pc-done .pc-chk, .ps-cash.pc-done .pc-chk path, .ps-cash.pc-bump > b { animation: none !important; }
+  .ps-cash.pc-done .pc-chk path { stroke-dashoffset: 0; }
+  .otcf button:active { transform: none; }
+}
 
 /* result card: slides up over the dock — win (count-up + confetti) or a calm, plain loss */
 #vMarket .result { position: absolute; left: 10px; right: 10px; bottom: 14px; z-index: 12; padding: 15px 16px 14px; border-radius: 28px; isolation: isolate;
@@ -2024,6 +2080,7 @@ html.sg-lens #tradeSheet > .sg-edge { backdrop-filter: url(#sgLens) blur(1.6px) 
           </div>
           <div class="dock" id="dock">
             <div class="pstrip" id="pStrip"></div>
+            <div class="otcf" id="otcFrac" role="group" aria-label="Cash out per tap"><button type="button" data-f="0.25" aria-pressed="false">25%</button><button type="button" data-f="0.5" aria-pressed="false">50%</button><button type="button" data-f="1" class="on" aria-pressed="true">All</button></div>
             <div class="amtline" id="amtLine">
               <div class="amtrow" id="amtRow"><button data-a="5">$5</button><button data-a="10" class="on">$10</button><button data-a="25">$25</button><button data-a="50">$50</button></div>
               <button class="otap" id="oneTap" type="button" role="switch" aria-checked="false"><i class="ot-lens" aria-hidden="true"><i class="ot-sheen"></i><i class="ot-glint"></i></i><svg class="ot-bolt" width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg><span class="ot-l">One tap</span></button>
@@ -4033,7 +4090,8 @@ function showToast(title, body) {
 //    build step). Each round tab shows its own countdown. The chip goes amber near the end and red + heartbeat in the last seconds (tfxTime colours #tlBox).
 //  · amounts on the page ($5 / $10 / $25 / $50, glass lens) so the buttons show what they pay before you tap; Up/Down → one tap Buy
 //  · a live position strip with Cash out (sell at the bid, 25 / 50 / All) once you hold a position in this round. Hold both Up and Down
-//    (step 21) and it shows one row per side, each with its own Winning / Losing and Cash out, and the round either way ("If ▲ Up wins …")
+//    (step 21) and it shows one row per side, each with its own Winning / Losing and Cash out, and the round either way ("If ▲ Up wins …").
+//    With One tap on (step 28), Cash out sells right there too, the share picked in the strip (step 29: 25% / 50% / All)
 //  · the result moment: a neutral "Checking final price…" beat, then a win reveal (count-up, confetti, balance rolls up) or a calm, plain loss card;
 //    "Next round" opens the ticket (it never buys for you); after 3 losses in a row it offers a break
 //  · a trades line that merges bursts (step 16), and opt-in live calls that land as pins on the line, never over it (chat button; off = a count badge)
@@ -4081,6 +4139,7 @@ function tfxReset() {
   Object.assign(TFX, { extra: 0, trKey: "", holdBal: null, lossStreak: 0, lastBeat: null, stripKey: null, stripWin: null, callQ: [], callUnseen: 0, balShown: null });
   clearTimeout(TFX.revealT); tfxHideResult();
   state.mode = "buy"; state.sellFrac = 1; state.sellSide = null;
+  OTC.hold = OTC.lockUntil = 0; // step 29: no held strip or Cash out lock after a reset (One tap and its share are preferences: they stay)
   $("settling").classList.remove("show"); $("chartCard").classList.remove("settle", "win", "lose");
   $("ticker").innerHTML = ""; $("callFly").innerHTML = ""; tfxCallBadge();
 }
@@ -4152,7 +4211,9 @@ function tfxLens(box, animate) {
 // Both sides (step 21): a row per side, each with its own stake → payout, its own Winning / Losing (Up and Down can't both win) and its own Cash out
 // (it opens the sheet for that side only), then the round either way: "If ▲ Up wins −$2.46 · If ▼ Down wins +$2.22" (roundIfs: cash-outs
 // already taken + that side's payout − everything put in). The outcome the price points to right now is the brighter half of that line.
-const psCashHTML = (s, one) => `<button class="ps-cash"${one ? ' id="psCash"' : ""} data-side="${s}"><span>Cash out<i class="ps-sr"> ${s === "up" ? "Up" : "Down"}</i></span><b${one ? ' id="psVal"' : ""} data-side="${s}"></b></button>`;
+// step 29: with One tap on the same button sells at once: "⚡ Cash out 50%" over the value of that share (.pc-b / .pc-f show only then), then
+// "✓ Sold $4.81" for a moment (.pc-ok); .pc-fx clips the press ripple. (<i> layers: the `.ps-cash > span` caption rule and `.ps-cash b` stay as they were)
+const psCashHTML = (s, one) => `<button class="ps-cash"${one ? ' id="psCash"' : ""} data-side="${s}"><i class="pc-fx" aria-hidden="true"></i><span><svg class="pc-b" width="10" height="10" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg>Cash out<i class="ps-sr"> ${s === "up" ? "Up" : "Down"}</i><em class="pc-f"></em></span><b${one ? ' id="psVal"' : ""} data-side="${s}"></b><i class="pc-ok" aria-hidden="true"><span class="pc-okl"><i class="pc-chk"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.3 4.3L19 7" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></i>Sold</span><span class="pc-okv"></span></i></button>`;
 // the price you got in at, next to Winning / Losing: "Entry 48¢" (one buy), "Avg 47.5¢" (several buys of that side: stake ÷ shares)
 const psEntTxt = b => { const c = Math.round(b.stake / b.payout * 1000) / 10; return `${b.n > 1 ? "Avg" : "Entry"} ${Number.isInteger(c) ? c : c.toFixed(1)}¢`; };
 const psEntHTML = b => `<span class="ps-ent"><i aria-hidden="true">·</i>${psEntTxt(b)}</span>`;
@@ -4160,42 +4221,45 @@ const psOneHTML = b => `<div class="ps-l"><div class="ps-r1"><span class="ps-sid
 const psRowHTML = b => `<div class="ps-row" data-side="${b.side}"><span class="ps-side ${b.side}">${sideTxt(b.side)}</span><span class="ps-mid"><span class="ps-amt">${psUsd(b.stake)} <span class="ar">→</span> ${moneyShort(b.payout)}</span><span class="ps-stt"><span class="t"></span>${psEntHTML(b)}</span></span>${psCashHTML(b.side)}</div>`;
 const psIfHTML = f => `<div class="ps-if"><span data-if="up">If <span aria-hidden="true">▲ </span>Up wins <b class="${netCls(f.up)}">${netTxt(f.up)}</b></span><i aria-hidden="true">·</i><span data-if="down">If <span aria-hidden="true">▼ </span>Down wins <b class="${netCls(f.down)}">${netTxt(f.down)}</b></span></div>`;
 function renderMine(m) {
+  if (performance.now() < OTC.hold) return; // step 29: a one-tap Cash out sold the last of a side: the strip holds still while its button says ✓ Sold
   const ps = roundPositions(m), dock = $("dock"), strip = $("pStrip"), card = $("chartCard");
   const holding = ps.length > 0;
   dock.classList.toggle("holding", holding);
   if (!holding) { TFX.stripKey = null; TFX.stripWin = null; card.classList.remove("win", "lose"); return; }
-  const B = sideBook(ps, m), dual = B.both, one = B.up.n ? "up" : "down", rem = m.end - simNow;
+  const B = sideBook(ps, m), dual = B.both, one = B.up.n ? "up" : "down", rem = m.end - simNow, k = otcK(); // k: the share a Cash out tap sells (step 29; 1 = all)
   const key = (dual ? "2" : "1") + ps.map(p => p.t + p.side + p.stake.toFixed(4)).join("|");
   if (TFX.stripKey !== key) {
     const fresh = TFX.stripKey === null;
     if (fresh || TFX.stripKey[0] !== key[0]) TFX.stripWin = null; // one side <-> both sides is a new layout, not a flip
     strip.classList.toggle("ps-dual", dual); strip.classList.remove("win", "lose");
     strip.innerHTML = dual ? psRowHTML(B.up) + psRowHTML(B.down) + psIfHTML(roundIfs(m)) : psOneHTML(B[one]);
+    strip.appendChild(OTC.seg); // step 29: the One tap share picker, one node kept across rebuilds (its glass lens stays)
     TFX.psV = {};
-    strip.querySelectorAll(".ps-cash b").forEach(b => { const s = b.dataset.side; TFX.psV[s] = MA.label(b, { format: v => money(v), minInterval: 1000, timing: "snappy" }); TFX.psV[s].snap(B[s].val); });
+    strip.querySelectorAll(".ps-cash b").forEach(b => { const s = b.dataset.side; TFX.psV[s] = MA.label(b, { format: v => money(v), minInterval: 1000, timing: "snappy" }); TFX.psV[s].snap(B[s].val * k); });
     TFX.stripKey = key; if (fresh) restartCls(strip, "pop");
   }
   if (!dual) {
-    TFX.psV[one].set(B[one].val);
+    TFX.psV[one].set(B[one].val * k);
     // step 25/26: no Winning / Losing word and no green / red tint: the strip stays neutral and shows the entry price (a red "Losing now"
     // nudges people to panic-sell; the Cash out value still says what it's worth). Only the clock speaks: "Final seconds", "Round ended"
     const st = rem <= 0 ? "Round ended" : rem <= 10 ? "Final seconds" : "";
     const stEl = $("psSt"); if (stEl.textContent !== st) stEl.textContent = st;
     stEl.parentNode.classList.toggle("nost", !st);
     strip.classList.remove("win", "lose");
-    $("psCash").disabled = rem <= 0 || B[one].val < .005;
+    $("psCash").disabled = rem <= 0 || B[one].val * k < .005;
   } else {
     for (const s of ["up", "down"]) {
       const row = strip.querySelector(`.ps-row[data-side="${s}"]`);
-      TFX.psV[s].set(B[s].val);
+      TFX.psV[s].set(B[s].val * k);
       row.classList.remove("win", "lose"); // step 25/26: both rows neutral, no Winning / Losing
       const st = rem <= 0 ? "Ended" : "", stEl = row.querySelector(".ps-stt .t"); if (stEl.textContent !== st) stEl.textContent = st;
       stEl.parentNode.classList.toggle("nost", !st);
-      row.querySelector(".ps-cash").disabled = rem <= 0 || B[s].val < .005;
+      row.querySelector(".ps-cash").disabled = rem <= 0 || B[s].val * k < .005;
     }
   }
   card.classList.remove("win", "lose"); // step 26: no chart-card glow either way, and no brighter "If … wins" half: nothing says who's ahead
   // step 26: no flash / tone when the lead flips (the strip no longer shows who's ahead)
+  otcStrip(m, B, k); // step 29: what a Cash out tap does ("⚡ Cash out 50%", its aria-label) and the share picker
 }
 
 // ---- time: hero countdown colours + last-10-seconds heartbeat ----
@@ -4282,8 +4346,9 @@ const otShortTxt = () => `You have ${money(balance)}${balance >= AMTS[0] ? ". Pi
 function otToggle() {
   OT.on = !OT.on; try { localStorage.setItem(OT_KEY, OT.on ? "1" : "0"); } catch (e) { /* not remembered, still works */ }
   fx.tap(); render(); otSwitchFx(OT.on);
-  otTip(!OT.on ? `<b>One tap is off</b>Up and Down open the ticket first.` : state.amount > balance ? `<b>One tap is on</b>${otShortTxt()}`
-    : `<b>One tap is on</b>Tapping Up or Down buys ${psUsd(state.amount)} at once.`, $("oneTap"));
+  const held = $("dock").classList.contains("holding"), cash = held ? " " + otcTipTxt() : ""; // step 29: holding, Cash out follows the switch too
+  otTip(!OT.on ? `<b>One tap is off</b>${held ? "Up, Down and Cash out" : "Up and Down"} open the ticket first.` : state.amount > balance ? `<b>One tap is on</b>${otShortTxt()}${cash}`
+    : `<b>One tap is on</b>Tapping Up or Down buys ${psUsd(state.amount)} at once.${cash}`, $("oneTap"));
 }
 function otSwitchFx(on) { // on: the glass lens springs into the groove, a glint crosses it and the bolt zaps; off: the lens sinks away
   const sw = $("oneTap"), lens = sw.querySelector(".ot-lens"), bolt = sw.querySelector(".ot-bolt");
@@ -4312,6 +4377,102 @@ function otPress(e) { // One tap: the button presses in with a ripple from the f
 function otRelease(b) {
   if (b._otSq) { b._otSq.cancel(); b._otSq = null; }
   if (!tfxReduced() && b.animate) b.animate([{ transform: "scale(.955)" }, { transform: "scale(1.02)", offset: .42 }, { transform: "scale(.995)", offset: .74 }, { transform: "none" }], { duration: 400, easing: "ease-out" });
+}
+
+// ---- One tap Cash out (step 29): with One tap on, a Cash out in the strip sells right there (no sheet), the share picked in the strip ----
+// Ask: "ONE TAP BASILIYSA CASHOUT DA ONE TAP OLMALI AMA %25 %50 FALAN AYARLANABİLMELİ". A small glass picker (25% / 50% / All, #otcFrac) sits at the
+// strip's bottom left, away from the Cash out buttons (a slip on it never sells), only while One tap is on and you hold a position. Each Cash out says
+// what a tap does ("⚡ Cash out 50%" over the value of that share, rolling) and sells only its own side (step 21) through the sheet's own sale:
+// state.sellSide / state.sellFrac + confirmCashout(), at the live price, which the value shows from the moment the finger lands (committed at
+// pointerdown, as step 28 does for buys). Feedback, neutral (cash back is not a win): the button presses in with a ripple, turns into "✓ Sold $4.81"
+// while a white ring rings out, the cash token flies to the balance pill (sgCashFly: the pill holds, then rolls up), fx.cash() + haptic, and #otSay
+// tells screen readers. While it says ✓ (OT_DONE, longer than OT_LOCK) a tap is the same tap: one sale. A sale that sold the last of a side holds the
+// strip still meanwhile, then the row (or the strip) goes, and Cash out stays locked a little longer, so the other side's button, which can land
+// where the finger was, never sells by accident. Off: Cash out opens the sheet exactly as before (its own 25 / 50 / All, from All). Remembered.
+const OTC = { frac: 1, k: null, lockUntil: 0, hold: 0, doneT: 0, seg: $("otcFrac") };
+const OTC_KEY = "updown.oneTapCash", OTC_FRACS = [.25, .5, 1], OTC_SETTLE = 500; // OTC_SETTLE: extra lock once the layout changed under the finger
+try { const f = +localStorage.getItem(OTC_KEY); if (OTC_FRACS.includes(f)) OTC.frac = f; } catch (e) { /* storage blocked: All */ }
+const otcK = () => OT.on ? OTC.frac : 1; // the share one Cash out tap sells (One tap off: the full value, as before; the sheet picks)
+const otcPct = f => f >= .999 ? "all" : Math.round(f * 100) + "%";
+const otcTipTxt = () => `Cash out sells ${otcPct(OTC.frac)} at once.`;
+function otcStrip(m, B, k) { // from renderMine: the buttons' "⚡ Cash out 50%" + aria-label, the values at once when the share changed, the picker
+  const on = OT.on, strip = $("pStrip");
+  if (OTC.k !== k) { // One tap or the pick changed: the values roll to the new share now (not at the label's next 1 s commit)
+    OTC.k = k;
+    for (const s in TFX.psV) { const v = B[s].val * k, t = money(v), L = (strip.querySelector(`.ps-cash b[data-side="${s}"]`) || {}).__maLabel; TFX.psV[s].set(v); if (L && L.text !== t) L.commit(t); }
+  }
+  const f = on ? (k >= .999 ? " all" : ` ${Math.round(k * 100)}%`) : "";
+  strip.querySelectorAll(".ps-cash").forEach(b => {
+    const s = b.dataset.side, fe = b.querySelector(".pc-f"); if (fe.textContent !== f) fe.textContent = f;
+    const lbl = on ? `Cash out ${otcPct(k)} of ${s === "up" ? "Up" : "Down"} now: ${money(B[s].val * k)} at ${sellCents({ side: s }, m)}¢` : null;
+    if (lbl === null) b.removeAttribute("aria-label"); else if (b.getAttribute("aria-label") !== lbl) b.setAttribute("aria-label", lbl);
+  });
+  otcSeg(); if (on) tfxLens(OTC.seg);
+}
+function otcSeg() { // the picker shows the pick (also straight from a tap: renderMine may be holding the strip still)
+  OTC.seg.querySelectorAll("button[data-f]").forEach(x => { const sel = Math.abs(+x.dataset.f - OTC.frac) < .001; x.classList.toggle("on", sel); if (x.getAttribute("aria-pressed") !== String(sel)) x.setAttribute("aria-pressed", String(sel)); });
+}
+function tfxStripCash(b) { // a Cash out in the strip (each side's own; #pStrip's click)
+  const side = b.dataset.side;
+  if (!OT.on) { openCashout(side); return; } // One tap off: the sheet, exactly as before
+  const now = performance.now(); if (sheetOpen || now < OTC.lockUntil) return; // it still says ✓ Sold: a double tap is one sale
+  const m = market(state.asset, state.round), lots = roundPositions(m).filter(p => p.side === side);
+  if (!lots.length || m.end - simNow <= 0) return; // (disabled then anyway)
+  const f = OTC.frac, c = sellCents(lots[0], m), from = b.getBoundingClientRect(), was = [state.sellSide, state.sellFrac];
+  state.sellSide = side; state.sellFrac = f; // the sheet's own sale (as both/shots_both.py's __sell): confirmCashout() at the live price, the one on the button
+  const r = confirmCashout(); state.sellSide = was[0]; state.sellFrac = was[1]; // (the sheet sets its own on open)
+  if (!r) { render(); return; }
+  const gone = !roundPositions(m).some(p => p.side === side); // that side is sold out: its row (or the strip) goes once the ✓ has been seen
+  OTC.lockUntil = now + OT_DONE + (gone ? OTC_SETTLE : 0); OTC.hold = gone ? now + OT_DONE : 0;
+  TFX.stripKey = "otc"; // the strip is rebuilt (now, or after the hold), not new: no pop, the ✓ is the feedback (renderMine resets it if the strip goes)
+  if (sgCashFlies()) TFX.holdBal = balance - r.got; // the balance pill waits for the cash token, then rolls up
+  render(); fx.cash();
+  const nb = $("pStrip").querySelector(`.ps-cash[data-side="${side}"]`) || b; otcDone(nb, r, nb !== b); // partial: the rebuilt button; sold out: the held one
+  sgCashFly(from, r);
+  if (gone) setTimeout(render, OT_DONE + 16); // then the strip catches up at once, not at the next 250 ms tick
+  otSay(`Sold ${otcPct(f)} of ${side === "up" ? "Up" : "Down"} at ${c}¢ for ${money(r.got)}`);
+}
+function otcSettle(side) { // the value shows the live price now (it otherwise commits at most once a second): the price you touch is the price you get
+  const m = market(state.asset, state.round), lots = roundPositions(m).filter(p => p.side === side), lbl = TFX.psV && TFX.psV[side];
+  const host = $("pStrip").querySelector(`.ps-cash b[data-side="${side}"]`); if (!lots.length || !lbl || !host) return;
+  const v = sumBy(lots, p => cashValue(p, m)) * OTC.frac, t = money(v), L = host.__maLabel;
+  lbl.set(v); if (L && L.text !== t) L.commit(t);
+}
+function otcPress(e) { // One tap on: a Cash out presses in with a ripple from the finger (dark ink on its white glass) and springs back on release
+  const b = e.target.closest && e.target.closest(".ps-cash");
+  if (!b || !OT.on || b.disabled || sheetOpen || performance.now() < OTC.lockUntil || (e.pointerType === "mouse" && e.button !== 0)) return;
+  otcSettle(b.dataset.side);
+  if (tfxReduced() || !b.animate) return;
+  const r = b.getBoundingClientRect(), k = b.offsetWidth / r.width || 1, x = (e.clientX - r.left) * k, y = (e.clientY - r.top) * k;
+  const d = 2.4 * b.offsetHeight, far = 2 * Math.hypot(Math.max(x, b.offsetWidth - x), Math.max(y, b.offsetHeight - y)) / d, rip = document.createElement("i");
+  rip.className = "pc-rip"; Object.assign(rip.style, { width: d + "px", height: d + "px", left: x - d / 2 + "px", top: y - d / 2 + "px" }); b.querySelector(".pc-fx").appendChild(rip);
+  rip.animate([{ transform: "scale(.05)", opacity: 1 }, { transform: "scale(1)", opacity: .8, offset: .4 }, { transform: `scale(${far.toFixed(2)})`, opacity: 0 }], { duration: 760, easing: "cubic-bezier(.2,.7,.3,1)" })
+    .finished.then(() => rip.remove(), () => rip.remove());
+  if (b._otSq) b._otSq.cancel();
+  b._otSq = b.animate([{ transform: "scale(1)" }, { transform: "scale(.94)" }], { duration: 110, easing: "cubic-bezier(.2,.8,.2,1)", fill: "forwards" });
+  const up = () => { removeEventListener("pointerup", up, true); removeEventListener("pointercancel", up, true); otRelease(b); }; // (the buy buttons' spring back)
+  addEventListener("pointerup", up, true); addEventListener("pointercancel", up, true);
+}
+function otcDone(b, r, fresh) { // "✓ Sold $4.81" on the button for a moment while a white ring rings out around it and a glint crosses it
+  b.querySelector(".pc-okv").textContent = money(r.got);
+  if (fresh) { b.classList.add("pc-now"); requestAnimationFrame(() => requestAnimationFrame(() => b.classList.remove("pc-now"))); } // rebuilt: no exit motion for its new numbers
+  clearTimeout(OTC.doneT); b.classList.remove("pc-done"); void b.offsetWidth; b.classList.add("pc-done");
+  OTC.doneT = setTimeout(() => b.classList.remove("pc-done"), OT_DONE);
+  if (tfxReduced() || !b.animate) return;
+  const dock = $("dock"), db = dock.getBoundingClientRect(), bb = b.getBoundingClientRect(), k = dock.offsetWidth / db.width || 1, w = b.offsetWidth, h = b.offsetHeight;
+  const ring = document.createElement("i"), gl = document.createElement("i"), rm = el => () => el.remove();
+  ring.className = "ot-wave cash"; gl.className = "pc-gl";
+  Object.assign(ring.style, { left: (((bb.left + bb.right) / 2 - db.left) * k - dock.clientLeft - w / 2).toFixed(1) + "px", top: (((bb.top + bb.bottom) / 2 - db.top) * k - dock.clientTop - h / 2).toFixed(1) + "px",
+    width: w + "px", height: h + "px", borderRadius: getComputedStyle(b).borderRadius });
+  dock.appendChild(ring); b.querySelector(".pc-fx").appendChild(gl);
+  ring.animate([{ opacity: .95, transform: "none" }, { opacity: 0, transform: `scale(${(1 + 18 / w).toFixed(3)},${(1 + 18 / h).toFixed(3)})` }], { duration: 760, easing: "cubic-bezier(.2,.7,.3,1)" }).finished.then(rm(ring), rm(ring));
+  gl.animate([{ transform: "translateX(-130%) skewX(-18deg)" }, { transform: "translateX(330%) skewX(-18deg)" }], { duration: 720, easing: "cubic-bezier(.3,.6,.3,1)" }).finished.then(rm(gl), rm(gl));
+}
+function otcPick(e) { // the picker: what one Cash out tap sells. The values roll to it at once and the buttons bump (as the amount chips bump Up / Down)
+  const b = e.target.closest("button[data-f]"); if (!b || Math.abs(+b.dataset.f - OTC.frac) < .001) return;
+  OTC.frac = +b.dataset.f; try { localStorage.setItem(OTC_KEY, String(OTC.frac)); } catch (err) { /* not remembered, still works */ }
+  fx.tap(); otcSeg(); render(); tfxLens(OTC.seg, true);
+  $("pStrip").querySelectorAll(".ps-cash").forEach(x => restartCls(x, "pc-bump"));
 }
 
 // ---- cash out: one side at a time (state.sellSide). Holding both, the other side is never touched ----
@@ -5420,7 +5581,8 @@ $("amtRow").addEventListener("click", e => {
   state.amount = +b.dataset.a; fx.tap(); render(); tfxLens($("amtRow"), true);
   restartCls($("btnUp"), "bump"); restartCls($("btnDown"), "bump");
 });
-$("pStrip").addEventListener("click", e => { const b = e.target.closest(".ps-cash"); if (b && !b.disabled) openCashout(b.dataset.side); }); // each side's own Cash out
+$("pStrip").addEventListener("click", e => { const b = e.target.closest(".ps-cash"); if (b && !b.disabled) tfxStripCash(b); }); // each side's own Cash out: the sheet, or with One tap on a sale right there (step 29)
+$("pStrip").addEventListener("pointerdown", otcPress); OTC.seg.addEventListener("click", otcPick); // step 29: the press (+ the value at the live price), the share picker
 $("oneTap").addEventListener("click", otToggle); // step 28: ▲ Up / ▼ Down clicks go to tfxDockSide (wired in step_tradefx.py; off it plays fx.tap() as these did)
 $("btnUp").addEventListener("pointerdown", otPress); $("btnDown").addEventListener("pointerdown", otPress);
 $("result").addEventListener("click", e => {
